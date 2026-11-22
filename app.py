@@ -202,15 +202,39 @@ MAJOR_TIER = {
     "Global China Studies (GCST)": -4,
 }
 
+# Entry-barrier adjustment: demanding processes (interview / written test, GPA 3.3+ declaration)
+# lift a major; easy "one-course" declaration discounts it (mixed intake). Not surfaced in rationale.
+MAJOR_BARRIER = {
+    "Quantitative Finance (QFIN)": 5, "Global Business (GBUS)": 5,
+    "Economics and Finance (ECOF)": 4, "Risk Management and Business Intelligence (RMBI)": 4,
+    "Computer Science (COMP)": 3, "Data Science and Technology (DSCT)": 3,
+    "Mathematics and Economics (MAEC)": 3,
+    "Computer Engineering (CPEG)": 2, "Electronic Engineering (ELEC)": 2,
+    "Decision Analytics (DA)": 2, "Finance (FINA)": 2, "Professional Accounting (PACC)": 2,
+    "Economics (ECON)": 1, "Mathematics (MATH)": 1, "Physics (PHYS)": 1,
+    "Quantitative Social Analysis (QSA)": 1, "Sustainable and Green Finance (SGFN)": 1,
+    "Aerospace Engineering (AE)": 0, "Bioengineering (BIEN)": 0,
+    "Chemical and Environmental Engineering (CEEV)": 0, "Civil and Environmental Engineering (CIVL)": 0,
+    "Mechanical Engineering (MECH)": 0, "Industrial Engineering and Engineering Management (IEEM)": 0,
+    "Sustainable Energy Engineering (SUSEE)": 0, "Integrative Systems and Design (ISD)": 0,
+    "Biotechnology and Business (BIBU)": 0, "Individualized Interdisciplinary Major (IIM)": 0,
+    "Environmental Management and Technology (EVMT)": -1,
+    "Marketing (MARK)": -2, "Management (MGMT)": -2, "Operations Management (OM)": -2,
+    "General Business Management (GBM)": -2, "Biochemistry and Cell Biology (BCB)": -2,
+    "Biotechnology (BIOT)": -2, "Chemistry (CHEM)": -2,
+    "Information Systems (IS)": -3, "Global China Studies (GCST)": -3,
+    "Ocean Science and Technology (OCES)": -3,
+}
+
 
 def _clamp_stat(v):
     return max(30, min(95, v))
 
 
 def major_profile(major):
-    """Content shape (MAJOR_PROFILES) shifted by the major's overall tier (MAJOR_TIER)."""
+    """Content shape shifted by overall tier + entry barrier, then widened 1.5x."""
     base = MAJOR_PROFILES.get(major, {a: 50 for a in RADAR_AXES})
-    off = MAJOR_TIER.get(major, 0)
+    off = round((MAJOR_TIER.get(major, 0) + MAJOR_BARRIER.get(major, 0)) * 1.5)
     return {a: _clamp_stat(v + off) for a, v in base.items()}
 
 
