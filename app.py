@@ -348,6 +348,22 @@ def intro_hero():
     )
 
 
+def boot_overlay():
+    """Geometric 'assembly' transition played once on entry."""
+    return (
+        '<div class="sm-boot">'
+        '<div class="sm-boot-grid"></div>'
+        '<div class="sm-boot-cross-h"></div><div class="sm-boot-cross-v"></div>'
+        '<div class="sm-boot-square s1"></div>'
+        '<div class="sm-boot-square s2"></div>'
+        '<div class="sm-boot-square s3"></div>'
+        '<div class="sm-boot-diamond"></div>'
+        '<div class="sm-boot-word">SMART <span>MATCH</span></div>'
+        '<div class="sm-boot-coord">22.3373&deg;N &middot; 114.2630&deg;E</div>'
+        '</div>'
+    )
+
+
 # ---------------------------------------------------------------------------
 # Scoring helpers
 # ---------------------------------------------------------------------------
@@ -941,6 +957,35 @@ details[open] summary::after { content: "[−]"; }
   .sm-target .t1 { animation: none !important; }
   .sm-overlay, .sm-launch { animation: none !important; opacity: 0 !important; visibility: hidden !important; }
 }
+
+/* ---- geometric boot / entry transition ---- */
+@keyframes bootGrid { 0% { opacity: 0; } 15% { opacity: 1; } 60% { opacity: 0.35; } 100% { opacity: 0; } }
+@keyframes bootCrossH { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+@keyframes bootCrossV { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+@keyframes bootSquare { from { transform: translate(-50%,-50%) scale(1.7); opacity: 0; } to { transform: translate(-50%,-50%) scale(1); opacity: 1; } }
+@keyframes bootDiamond { 0% { transform: translate(-50%,-50%) scale(0) rotate(0deg); opacity: 0; } 60% { transform: translate(-50%,-50%) scale(1.2) rotate(45deg); opacity: 1; } 100% { transform: translate(-50%,-50%) scale(1) rotate(45deg); opacity: 1; } }
+@keyframes bootWord { from { letter-spacing: 0.55em; opacity: 0; filter: blur(8px); } to { letter-spacing: 0.2em; opacity: 1; filter: blur(0); } }
+@keyframes bootCoord { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes bootOut { 0%, 74% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100%); visibility: hidden; } }
+
+.sm-boot { position: fixed; inset: 0; z-index: 9999; overflow: hidden; background: #0a0a0c; pointer-events: none; animation: bootOut 0.5s cubic-bezier(0.7,0,0.84,0) 0.82s forwards; }
+.sm-boot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--red); }
+.sm-boot-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 44px 44px; animation: bootGrid 1.3s ease forwards; }
+.sm-boot-cross-h { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--red); transform-origin: center; animation: bootCrossH 0.4s cubic-bezier(0.16,1,0.3,1) 0.05s both; }
+.sm-boot-cross-v { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: var(--red); transform-origin: center; animation: bootCrossV 0.4s cubic-bezier(0.16,1,0.3,1) 0.05s both; }
+.sm-boot-square { position: absolute; left: 50%; top: 50%; border: 1px solid var(--line-2); animation: bootSquare 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.sm-boot-square.s1 { width: 300px; height: 300px; animation-delay: 0.12s; }
+.sm-boot-square.s2 { width: 190px; height: 190px; animation-delay: 0.2s; }
+.sm-boot-square.s3 { width: 90px; height: 90px; border-color: var(--red); animation-delay: 0.28s; }
+.sm-boot-diamond { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; border: 1px solid var(--red); animation: bootDiamond 0.4s cubic-bezier(0.16,1,0.3,1) 0.34s both; }
+.sm-boot-word { position: absolute; left: 50%; top: calc(50% + 195px); transform: translateX(-50%); font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.2em; color: var(--ink); text-align: center; white-space: nowrap; animation: bootWord 0.4s cubic-bezier(0.16,1,0.3,1) 0.42s both; }
+.sm-boot-word span { color: var(--red); }
+.sm-boot-coord { position: absolute; left: 50%; top: calc(50% + 232px); transform: translateX(-50%); font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; color: var(--muted); white-space: nowrap; animation: bootCoord 0.35s ease 0.5s both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sm-boot { animation: none !important; opacity: 0 !important; visibility: hidden !important; }
+  .sm-boot * { animation: none !important; }
+}
 </style>
 
 <div class="sm-header">
@@ -958,6 +1003,9 @@ if "view" not in st.session_state:
 
 if st.session_state.view == "intro":
     # --- title screen ---
+    if not st.session_state.get("boot_played"):
+        st.markdown(boot_overlay(), unsafe_allow_html=True)
+        st.session_state.boot_played = True
     st.markdown(intro_hero(), unsafe_allow_html=True)
     _, mid, _ = st.columns([1, 1.4, 1])
     with mid:
