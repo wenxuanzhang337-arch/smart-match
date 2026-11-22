@@ -166,6 +166,49 @@ def _major_stats(major, rng=None):
     return {a: max(30, min(95, v + rng.randint(-8, 8))) for a, v in base.items()}
 
 
+# Why each major's 7-axis profile is distributed the way it is.
+MAJOR_RATIONALE = {
+    "Aerospace Engineering (AE)": "Aerodynamics, structures and flight mechanics favour maths, simulation and careful planning; less writing and speaking.",
+    "Biochemistry and Cell Biology (BCB)": "Lab-centred with heavy scientific writing and data interpretation; little coding or design.",
+    "Bioengineering (BIEN)": "Bridges engineering and life science — coding and data plus lab write-ups; lighter on speaking.",
+    "Biotechnology (BIOT)": "Research-oriented with report writing and data analysis; little programming or design.",
+    "Biotechnology and Business (BIBU)": "Pairs science with business, so writing, speaking and leadership stay balanced.",
+    "Chemical and Environmental Engineering (CEEV)": "Process and environmental design demand technical writing and planning; limited speaking.",
+    "Chemistry (CHEM)": "Lab-heavy with extensive report writing and data handling; minimal coding or design.",
+    "Civil and Environmental Engineering (CIVL)": "Structural design and site analysis need planning, writing and some design; modest speaking.",
+    "Computer Engineering (CPEG)": "Hardware plus software — strong coding and data; less writing and speaking.",
+    "Computer Science (COMP)": "Programming- and algorithm-heavy, so Code and Data dominate; little presentation or writing practice.",
+    "Data Science and Technology (DSCT)": "Math, statistics and machine learning make Data and Code the peaks; speaking and design stay low.",
+    "Decision Analytics (DA)": "Optimization and data-driven decisions — strong Data and Planning with balanced communication.",
+    "Economics (ECON)": "Theory, econometrics and essays — strong writing and data; little coding or design.",
+    "Economics and Finance (ECOF)": "Quantitative finance and essays — high data and writing; little design.",
+    "Electronic Engineering (ELEC)": "Circuits and systems favour coding and maths; less writing and speaking.",
+    "Environmental Management and Technology (EVMT)": "Policy plus environmental science — writing, planning and communication; less coding.",
+    "Finance (FINA)": "Valuation, markets and modelling — strong data plus presentation; little coding or design.",
+    "General Business Management (GBM)": "Broad management develops leadership, speaking and planning; minimal technical work.",
+    "Global Business (GBUS)": "International business and negotiation — top speaking and leadership; minimal coding.",
+    "Global China Studies (GCST)": "Humanities and social analysis — strongest writing and speaking; little maths or coding.",
+    "Individualized Interdisciplinary Major (IIM)": "Student-designed, so it defaults to a balanced profile across all axes.",
+    "Industrial Engineering and Engineering Management (IEEM)": "Process optimisation and operations — planning, data and leadership; moderate writing.",
+    "Information Systems (IS)": "Business plus IT — strong data and coding with project planning and communication.",
+    "Integrative Systems and Design (ISD)": "Design thinking and prototyping — top design plus planning; lighter on coding.",
+    "Management (MGMT)": "People and organisations — leadership, speaking and planning; little technical work.",
+    "Marketing (MARK)": "Consumer insight and creative campaigns — speaking, design and writing; little coding.",
+    "Mathematics (MATH)": "Pure and applied maths — strong code and data; less writing and speaking.",
+    "Mathematics and Economics (MAEC)": "Quantitative economics — strong data and code; modest writing and speaking.",
+    "Mechanical Engineering (MECH)": "Mechanics, CAD and prototyping — design and planning plus decent coding and data.",
+    "Ocean Science and Technology (OCES)": "Field and lab science — data and writing; less speaking or design.",
+    "Operations Management (OM)": "Supply chains and processes — planning, data and leadership; less coding.",
+    "Physics (PHYS)": "Theory and experiment — strong code and data; less speaking or design.",
+    "Professional Accounting (PACC)": "Financial reporting and audit — planning, writing and data; little coding.",
+    "Quantitative Finance (QFIN)": "Math and finance modelling — top data plus coding; moderate speaking.",
+    "Quantitative Social Analysis (QSA)": "Social statistics — strong data and writing; moderate speaking; little design.",
+    "Risk Management and Business Intelligence (RMBI)": "Risk models and business intelligence — strong data and planning; moderate leadership.",
+    "Sustainable and Green Finance (SGFN)": "Finance plus sustainability — data, writing and planning; little coding.",
+    "Sustainable Energy Engineering (SUSEE)": "Energy systems and policy — planning, writing and analysis; moderate coding.",
+}
+
+
 def build_sample_library(n=50, seed=7):
     rng = random.Random(seed)
     students = []
@@ -643,6 +686,32 @@ def radar_svg(stats, size=300):
     return f'<svg width="{size}" height="{size}" viewBox="0 0 {size} {size}">' + "".join(parts) + '</svg>'
 
 
+def major_profiles_html():
+    """Clickable accordion: major name -> radar + rationale with a geometric reveal."""
+    items = []
+    for i, (major, prof) in enumerate(MAJOR_PROFILES.items(), 1):
+        why = MAJOR_RATIONALE.get(major, "")
+        ranked = sorted(prof.items(), key=lambda kv: kv[1], reverse=True)
+        strong = ranked[:2]
+        weak = sorted(prof.items(), key=lambda kv: kv[1])[:2]
+        strong_html = "".join(f'<span class="sm-mtag hi">{a} {v}</span>' for a, v in strong)
+        weak_html = "".join(f'<span class="sm-mtag lo">{a} {v}</span>' for a, v in weak)
+        items.append(
+            '<details class="sm-major">'
+            f'<summary class="sm-major-head"><span class="sm-major-idx">{i:02d}</span>'
+            f'<span class="sm-major-name">{major}</span>'
+            f'<span class="sm-major-hint">{strong[0][0]} · {strong[1][0]}</span></summary>'
+            '<div class="sm-major-body"><div class="sm-detail-grid">'
+            f'<div class="sm-radar">{radar_svg(prof)}</div>'
+            '<div class="sm-major-info">'
+            f'<p class="sm-major-why">{why}</p>'
+            f'<div class="sm-major-tags"><span class="sm-mtag-lbl">Strong</span>{strong_html}</div>'
+            f'<div class="sm-major-tags"><span class="sm-mtag-lbl">Weaker</span>{weak_html}</div>'
+            '</div></div></div></details>'
+        )
+    return '<div class="sm-major-list">' + "".join(items) + '</div>'
+
+
 PROJECT_CONTEXT = (
     "PROJECT BACKGROUND: Smart Match is an AI-powered teammate-recommendation system for HKUST "
     "(Hong Kong University of Science and Technology) students forming groups for course projects. "
@@ -1092,6 +1161,31 @@ details[open] summary::after { content: "[−]"; }
   .sm-boot { animation: none !important; opacity: 0 !important; visibility: hidden !important; }
   .sm-boot * { animation: none !important; }
 }
+
+/* major profile accordion */
+.sm-major-list { margin-top: 4px; }
+.sm-major { border: 1px solid var(--line); border-left: 2px solid var(--blue); background: var(--surface); margin-bottom: 8px; }
+details.sm-major[open] { border-left-color: var(--red); }
+.sm-major-head { display: flex; align-items: baseline; gap: 14px; cursor: pointer; list-style: none; padding: 12px 16px; }
+summary.sm-major-head::-webkit-details-marker { display: none; }
+.sm-major-idx { font-family: 'IBM Plex Mono', monospace; color: var(--faint); font-size: 0.72rem; }
+.sm-major-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--ink); letter-spacing: 0.02em; }
+.sm-major-hint { margin-left: auto; font-family: 'IBM Plex Mono', monospace; color: var(--faint); font-size: 0.68rem; letter-spacing: 0.05em; }
+.sm-major-head::after { content: "[+]"; color: var(--red); font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; margin-left: 4px; }
+details.sm-major[open] .sm-major-head::after { content: "[−]"; }
+.sm-major-body { padding: 0 16px 18px; }
+details.sm-major[open] .sm-major-body { animation: majorReveal 0.34s cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes majorReveal {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateX(-10px); }
+  to   { opacity: 1; clip-path: inset(0 0 0 0); transform: translateX(0); }
+}
+.sm-major-why { font-family: 'IBM Plex Mono', monospace; color: var(--muted); font-size: 0.8rem; line-height: 1.65; margin: 4px 0 12px; max-width: 62ch; }
+.sm-major-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+.sm-mtag-lbl { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-right: 2px; }
+.sm-mtag { font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; letter-spacing: 0.03em; padding: 2px 8px; border: 1px solid var(--line-2); color: var(--muted); }
+.sm-mtag.hi { border-color: rgba(217,119,110,0.5); color: var(--red); }
+.sm-mtag.lo { border-color: var(--line); color: var(--faint); }
+@media (prefers-reduced-motion: reduce) { details.sm-major[open] .sm-major-body { animation: none !important; } }
 </style>
 
 <div class="sm-header">
@@ -1243,9 +1337,8 @@ elif st.session_state.view == "library":
 elif st.session_state.view == "profiles":
     # --- major 7-axis profile summary ---
     st.markdown(section("00", "Major Profiles"), unsafe_allow_html=True)
-    st.caption("Base 7-axis skill priors per major (0–100), blended with each student's own role history in matching.")
-    rows = [{"Major": m, **p} for m, p in MAJOR_PROFILES.items()]
-    st.dataframe(rows, use_container_width=True, hide_index=True, height=560)
+    st.caption("Click a major to reveal its 7-axis profile and why the values are set that way.")
+    st.markdown(major_profiles_html(), unsafe_allow_html=True)
 
 elif st.session_state.view == "logic":
     # --- how the matching works ---
