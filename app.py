@@ -61,11 +61,47 @@ _LAST = ["Wong", "Chan", "Lee", "Ng", "Tan", "Lim", "Cheng", "Ho", "Lau", "Chow"
          "Mak", "Mok", "Or", "Poon", "Siu", "To", "Tse", "Wan", "Wu", "Yam",
          "Yau", "Yu", "Au", "Chiu", "Fong", "Hau", "Ip", "Kong", "Leung", "Ma",
          "Ngai", "So", "Tam", "Yim", "Yun"]
-_MAJORS = ["Computer Science", "Computer Engineering", "Data Science", "Information Systems",
-           "Business and Management", "Marketing", "Economics", "Finance", "Accounting",
-           "Mathematics", "Physics", "Chemistry", "Life Science", "Mechanical Engineering",
-           "Civil Engineering", "Electronic Engineering", "Industrial Engineering",
-           "Design", "Humanities", "Social Science"]
+# HKUST undergraduate major programs (official abbreviations in parentheses).
+_MAJORS = [
+    "Aerospace Engineering (AE)",
+    "Biochemistry and Cell Biology (BCB)",
+    "Bioengineering (BIEN)",
+    "Biotechnology (BIOT)",
+    "Biotechnology and Business (BIBU)",
+    "Chemical and Environmental Engineering (CEEV)",
+    "Chemistry (CHEM)",
+    "Civil and Environmental Engineering (CIVL)",
+    "Computer Engineering (CPEG)",
+    "Computer Science (COMP)",
+    "Data Science and Technology (DSCT)",
+    "Decision Analytics (DA)",
+    "Economics (ECON)",
+    "Economics and Finance (ECOF)",
+    "Electronic Engineering (ELEC)",
+    "Environmental Management and Technology (EVMT)",
+    "Finance (FINA)",
+    "General Business Management (GBM)",
+    "Global Business (GBUS)",
+    "Global China Studies (GCST)",
+    "Individualized Interdisciplinary Major (IIM)",
+    "Industrial Engineering and Engineering Management (IEEM)",
+    "Information Systems (IS)",
+    "Integrative Systems and Design (ISD)",
+    "Management (MGMT)",
+    "Marketing (MARK)",
+    "Mathematics (MATH)",
+    "Mathematics and Economics (MAEC)",
+    "Mechanical Engineering (MECH)",
+    "Ocean Science and Technology (OCES)",
+    "Operations Management (OM)",
+    "Physics (PHYS)",
+    "Professional Accounting (PACC)",
+    "Quantitative Finance (QFIN)",
+    "Quantitative Social Analysis (QSA)",
+    "Risk Management and Business Intelligence (RMBI)",
+    "Sustainable and Green Finance (SGFN)",
+    "Sustainable Energy Engineering (SUSEE)",
+]
 _OTHER_COURSES = ["ISOM3540", "COMP2011", "COMP1021", "MARK2120", "ECON2103", "ACCT2010", "LANG1002", "PHYS1112"]
 
 _ROLE_STAT_BONUS = {
@@ -1063,7 +1099,7 @@ else:
     with st.form("questionnaire"):
         st.markdown(section("01", "About you"), unsafe_allow_html=True)
         year = st.selectbox("Year of study", ["Year 1", "Year 2", "Year 3", "Year 4"])
-        major = st.selectbox("School / Major", _MAJORS)
+        major = st.selectbox("Major", _MAJORS)
         course = st.text_input("Which course are you looking for teammates for?", value="COMP1945")
         team_size = st.selectbox("How many people per team in this course?", TEAM_SIZES)
 
