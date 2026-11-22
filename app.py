@@ -1074,51 +1074,66 @@ else:
     if st.session_state.get("just_started"):
         st.markdown(launch_overlay(), unsafe_allow_html=True)
         st.session_state.just_started = False
-    with st.form("questionnaire"):
-        st.markdown(section("01", "About you"), unsafe_allow_html=True)
-        year = st.selectbox("Year of study", ["Year 1", "Year 2", "Year 3", "Year 4"])
-        major = st.selectbox("Major", _MAJORS)
-        course = st.text_input("Which course are you looking for teammates for?", value="COMP1945")
-        team_size = st.selectbox("How many people per team in this course?", TEAM_SIZES)
+    st.markdown(section("01", "About you"), unsafe_allow_html=True)
+    year = st.selectbox("Year of study", ["Year 1", "Year 2", "Year 3", "Year 4"])
+    major = st.selectbox("Major", _MAJORS)
+    course = st.text_input("Which course are you looking for teammates for?", value="COMP1945")
+    team_size = st.selectbox("How many people per team in this course?", TEAM_SIZES)
 
-        st.markdown(section("02", "Roles and skills"), unsafe_allow_html=True)
-        roles = st.multiselect("Which roles have you actually taken in past projects?", ALL_ROLES)
+    st.markdown(section("02", "Roles and skills"), unsafe_allow_html=True)
+    roles = st.multiselect("Which roles have you actually taken in past projects?", ALL_ROLES)
 
-        st.markdown(section("03", "Availability"), unsafe_allow_html=True)
-        hours = st.radio("Hours per week you can commit", HOURS, horizontal=True)
-        meeting = st.multiselect("Preferred meeting times", MEETING)
-        load = st.multiselect("What else occupies your time outside coursework?", LOAD)
+    st.markdown(section("03", "Availability"), unsafe_allow_html=True)
+    hours = st.radio("Hours per week you can commit", HOURS, horizontal=True)
+    meeting = st.multiselect("Preferred meeting times", MEETING)
+    load = st.multiselect("What else occupies your time outside coursework?", LOAD)
 
-        st.markdown(section("04", "Goals and expectations"), unsafe_allow_html=True)
-        grade = st.radio("Your target grade", GRADES)
-        expect = st.radio("What do you expect from teammates?", EXPECT)
+    st.markdown(section("04", "Goals and expectations"), unsafe_allow_html=True)
+    grade = st.radio("Your target grade", GRADES)
+    expect = st.radio("What do you expect from teammates?", EXPECT)
 
-        st.markdown(section("05", "Working style"), unsafe_allow_html=True)
-        discussion = st.radio("In discussion, you actually tended to...", DISCUSSION)
-        decision = st.radio("When a decision was needed, you preferred...", DECISION)
-        deadline = st.radio("How did you handle your last project's deadline?", DEADLINE)
+    st.markdown(section("05", "Working style"), unsafe_allow_html=True)
+    discussion = st.radio("In discussion, you actually tended to...", DISCUSSION)
+    decision = st.radio("When a decision was needed, you preferred...", DECISION)
+    deadline = st.radio("How did you handle your last project's deadline?", DEADLINE)
 
-        st.markdown(section("06", "Reliability"), unsafe_allow_html=True)
-        reliability = st.radio("When your own parts were due, you usually delivered...", RELIABILITY)
+    st.markdown(section("06", "Reliability"), unsafe_allow_html=True)
+    reliability = st.radio("When your own parts were due, you usually delivered...", RELIABILITY)
 
-        st.markdown(section("07", "Other"), unsafe_allow_html=True)
-        pref_major = st.radio("Prefer teammates from", ["Same major", "Different major (complementary)", "Doesn't matter"])
-        suggestion = st.text_area("Any suggestions for the system? (optional)")
+    st.markdown(section("07", "Other"), unsafe_allow_html=True)
+    pref_major = st.radio("Prefer teammates from", ["Same major", "Different major (complementary)", "Doesn't matter"])
+    suggestion = st.text_area("Any suggestions for the system? (optional)")
 
-        st.markdown(section("08", "Priority weights"), unsafe_allow_html=True)
-        st.caption("Set each dimension from 0–100 (0 = don't care, 100 = most important). They're normalized automatically — max one and zero the rest if you like.")
-        w_skills = st.slider("Skills complementarity", 0, 100, DEFAULT_WEIGHTS["Skills"], key="w_skills")
-        w_avail = st.slider("Availability alignment", 0, 100, DEFAULT_WEIGHTS["Availability"], key="w_avail")
-        w_style = st.slider("Working-style compatibility", 0, 100, DEFAULT_WEIGHTS["Working style"], key="w_style")
-        w_goals = st.slider("Goals alignment", 0, 100, DEFAULT_WEIGHTS["Goals"], key="w_goals")
-        w_reliab = st.slider("Reliability", 0, 100, DEFAULT_WEIGHTS["Reliability"], key="w_reliab")
+    st.markdown(section("08", "Priority weights"), unsafe_allow_html=True)
+    st.caption("Allocate **100 points** across the five dimensions. Every slider starts at 0; the total can never exceed 100 — at 100 they lock until you drop one.")
+    _wdims = [
+        ("Skills complementarity", "Skills", "bw_skills"),
+        ("Availability alignment", "Availability", "bw_avail"),
+        ("Working-style compatibility", "Working style", "bw_style"),
+        ("Goals alignment", "Goals", "bw_goals"),
+        ("Reliability", "Reliability", "bw_reliab"),
+    ]
+    _wcur = {d: int(st.session_state.get(key, 0)) for _, d, key in _wdims}
+    _cap = lambda d: max(0, 100 - sum(_wcur[x] for x in _wcur if x != d))
+    w_skills = st.slider("Skills complementarity", 0, _cap("Skills"), _wcur["Skills"], key="bw_skills")
+    w_avail = st.slider("Availability alignment", 0, _cap("Availability"), _wcur["Availability"], key="bw_avail")
+    w_style = st.slider("Working-style compatibility", 0, _cap("Working style"), _wcur["Working style"], key="bw_style")
+    w_goals = st.slider("Goals alignment", 0, _cap("Goals"), _wcur["Goals"], key="bw_goals")
+    w_reliab = st.slider("Reliability", 0, _cap("Reliability"), _wcur["Reliability"], key="bw_reliab")
+    _wtotal = w_skills + w_avail + w_style + w_goals + w_reliab
+    if _wtotal == 100:
+        st.caption("✅ All **100** points allocated — sliders are locked.")
+    else:
+        st.caption(f"⚠️ **{100 - _wtotal}** point(s) left to allocate.")
 
-        st.caption("By submitting, you agree that your answers are stored anonymously (under a generated name) to improve matching.")
-        submitted = st.form_submit_button("Find teammates")
+    st.caption("By submitting, you agree that your answers are stored anonymously (under a generated name) to improve matching.")
+    submitted = st.button("Find teammates", type="primary", use_container_width=True)
 
     if submitted:
         if not roles or not meeting:
             st.warning("Please pick at least one role and one meeting time.")
+        elif _wtotal == 0:
+            st.warning("Please allocate at least a few points across the five priority dimensions.")
         else:
             st.session_state.user = {
                 "course": course, "roles": roles, "hours": hours, "meeting": meeting,
