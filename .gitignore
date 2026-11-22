@@ -1,0 +1,11 @@
+# Streamlit secrets — contains API keys (DeepSeek + Supabase), NEVER commit
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# OS
+.DS_Store
+Thumbs.db
