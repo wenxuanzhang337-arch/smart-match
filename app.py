@@ -503,10 +503,10 @@ def radar_svg(stats, size=300):
     data_pts = " ".join(
         f"{vertex(r, i, stats[RADAR_AXES[i]] / 100)[0]:.1f},{vertex(r, i, stats[RADAR_AXES[i]] / 100)[1]:.1f}"
         for i in range(n))
-    parts.append(f'<polygon points="{data_pts}" fill="rgba(255,255,255,0.14)" stroke="#f5f5f4" stroke-width="2"/>')
+    parts.append(f'<polygon points="{data_pts}" fill="rgba(77,124,255,0.26)" stroke="#4d7cff" stroke-width="2"/>')
     for i in range(n):
         x, y = vertex(r, i, stats[RADAR_AXES[i]] / 100)
-        parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="#f5f5f4"/>')
+        parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="#4d7cff"/>')
 
     for i, label in enumerate(RADAR_AXES):
         lx, ly = vertex(label_r, i)
@@ -515,7 +515,7 @@ def radar_svg(stats, size=300):
             anchor = "start"
         elif lx < cx - 6:
             anchor = "end"
-        parts.append(f'<text x="{lx:.1f}" y="{ly:.1f}" fill="#8a8a90" font-size="10" font-family="IBM Plex Mono, monospace" '
+        parts.append(f'<text x="{lx:.1f}" y="{ly:.1f}" fill="#9a9aa3" font-size="10" font-family="IBM Plex Mono, monospace" '
                      f'text-anchor="{anchor}" dominant-baseline="middle">{label}</text>')
 
     return f'<svg width="{size}" height="{size}" viewBox="0 0 {size} {size}">' + "".join(parts) + '</svg>'
@@ -747,10 +747,10 @@ st.markdown('''
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --bg: #0a0a0b; --surface: rgba(255,255,255,0.05); --surface-2: rgba(255,255,255,0.08);
-  --line: rgba(255,255,255,0.12); --line-2: rgba(255,255,255,0.24);
-  --ink: #f5f5f4; --muted: #9a9aa0; --faint: #5f5f64;
-  --red: #f5f5f4; --blue: #c7c7cc; --yellow: #8a8a90;
+  --bg: #0a0a0c; --surface: #101013; --surface-2: #15151a;
+  --line: #232329; --line-2: #34343d;
+  --ink: #f2f1ed; --muted: #9a9aa3; --faint: #5f5f68;
+  --red: #ff4d4d; --blue: #4d7cff; --yellow: #ffd23f;
 }
 
 html, body { overflow-x: hidden; }
@@ -781,9 +781,8 @@ html, body { overflow-x: hidden; }
 /* form */
 [data-testid="stForm"] {
   background: var(--surface);
-  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--line);
-  border-left: 2px solid var(--red);
+  border-left: 4px solid var(--blue);
   padding: 34px 42px;
 }
 [data-testid="stWidgetLabel"] p { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.03em; }
@@ -838,7 +837,10 @@ html, body { overflow-x: hidden; }
 .sm-hero-title .accent { color: var(--red); }
 .sm-tagline { color: var(--muted); letter-spacing: 0.03em; margin-top: 12px; font-size: 0.9rem; font-family: 'IBM Plex Mono', monospace; }
 .sm-chips { display: flex; gap: 10px; justify-content: center; margin: 24px 0 6px; flex-wrap: wrap; }
-.sm-chip { border: 1px solid var(--line-2); color: var(--blue); font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; padding: 6px 14px; }
+.sm-chip { border: 1px solid var(--line); color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; padding: 6px 14px; }
+.sm-chip:nth-child(1) { border-color: rgba(255,77,77,0.5); color: var(--red); }
+.sm-chip:nth-child(2) { border-color: rgba(77,124,255,0.5); color: var(--blue); }
+.sm-chip:nth-child(3) { border-color: rgba(255,210,63,0.5); color: var(--yellow); }
 
 /* MATCH FOUND overlay: corner-bracket frame */
 .sm-overlay {
@@ -855,7 +857,7 @@ html, body { overflow-x: hidden; }
 .sm-frame .c.br { bottom: 0; right: 0; border-bottom-width: 3px; border-right-width: 3px; }
 .sm-overlay-text {
   font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; letter-spacing: 0.18em;
-  color: var(--red); text-shadow: 0 0 24px rgba(255,255,255,0.35); animation: smPop 0.4s ease-out;
+  color: var(--red); text-shadow: 0 0 28px rgba(255,77,77,0.5); animation: smPop 0.4s ease-out;
 }
 .sm-overlay-sub { font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); font-size: 0.72rem; margin-top: 14px; }
 @keyframes smPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -863,10 +865,10 @@ html, body { overflow-x: hidden; }
 /* results */
 .sm-results-head { font-family: 'IBM Plex Mono', monospace; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); border-left: 4px solid var(--blue); padding-left: 12px; margin: 22px 0 14px; font-size: 0.8rem; }
 
-.sm-card { background: var(--surface); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--line); border-left: 2px solid var(--red); padding: 18px 24px; margin-bottom: 14px; transition: border-color 0.15s ease; }
+.sm-card { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--blue); padding: 18px 24px; margin-bottom: 14px; transition: border-color 0.15s ease; }
 .sm-card:hover { border-color: var(--line-2); border-left-color: var(--red); }
 details[open].sm-card { border-left-color: var(--red); }
-.sm-card.picked { border-color: var(--line-2); border-left-color: var(--red); }
+.sm-card.picked { border-color: rgba(255,77,77,0.5); border-left-color: var(--red); }
 
 .sm-card-head { display: flex; align-items: baseline; gap: 14px; cursor: pointer; list-style: none; }
 summary::-webkit-details-marker { display: none; }
@@ -901,10 +903,10 @@ details[open] summary::after { content: "[−]"; }
 .sm-ai-tag { color: var(--faint); font-size: 0.6rem; letter-spacing: 0.08em; border: 1px solid var(--line); padding: 1px 6px; vertical-align: middle; font-weight: 500; font-family: 'IBM Plex Mono', monospace; }
 
 /* team coverage */
-.sm-coverage { background: var(--surface); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--line); border-left: 2px solid var(--blue); padding: 20px 24px; margin: 8px 0 22px; }
+.sm-coverage { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--yellow); padding: 20px 24px; margin: 8px 0 22px; }
 .sm-coverage-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); font-size: 0.95rem; margin-bottom: 14px; }
 .sm-cover-score { color: var(--yellow); margin-left: 10px; font-family: 'IBM Plex Mono', monospace; }
-.sm-gap { margin-top: 14px; padding: 10px 12px; border: 1px solid var(--line-2); color: var(--muted); font-size: 0.82rem; font-family: 'IBM Plex Mono', monospace; }
+.sm-gap { margin-top: 14px; padding: 10px 12px; border: 1px solid rgba(255,210,63,0.4); color: var(--muted); font-size: 0.82rem; font-family: 'IBM Plex Mono', monospace; }
 .sm-gap.ok { border-color: var(--line); color: var(--faint); }
 .sm-gap b { color: var(--ink); }
 
@@ -914,7 +916,7 @@ details[open] summary::after { content: "[−]"; }
 .sm-launch { position: fixed; inset: 0; z-index: 999; overflow: hidden; pointer-events: none; background: rgba(10,10,12,0.95); animation: smLaunchFade 1.9s ease-out forwards; }
 @keyframes smLaunchFade { 0%, 78% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
 .sm-launch-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.sm-launch-text { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; letter-spacing: 0.16em; color: var(--red); text-shadow: 0 0 24px rgba(255,255,255,0.35); animation: smPop 0.4s ease-out; }
+.sm-launch-text { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; letter-spacing: 0.16em; color: var(--blue); text-shadow: 0 0 28px rgba(77,124,255,0.5); animation: smPop 0.4s ease-out; }
 .sm-launch-sub { font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); font-size: 0.72rem; margin-top: 14px; }
 
 /* responsive */
