@@ -1128,19 +1128,26 @@ else:
         suggestion = st.text_area("Any suggestions for the system? (optional)")
 
         st.markdown(section("08", "Priority weights"), unsafe_allow_html=True)
-        st.caption("Split **100 points** across the five dimensions (must total exactly 100). You can't max everything — just like there's no perfect teammate.")
-        w_skills = st.number_input("Skills complementarity", 0, 100, DEFAULT_WEIGHTS["Skills"], 5, key="w_skills")
-        w_avail = st.number_input("Availability alignment", 0, 100, DEFAULT_WEIGHTS["Availability"], 5, key="w_avail")
-        w_style = st.number_input("Working-style compatibility", 0, 100, DEFAULT_WEIGHTS["Working style"], 5, key="w_style")
-        w_goals = st.number_input("Goals alignment", 0, 100, DEFAULT_WEIGHTS["Goals"], 5, key="w_goals")
-        w_reliab = st.number_input("Reliability", 0, 100, DEFAULT_WEIGHTS["Reliability"], 5, key="w_reliab")
+        st.caption("Split **100 points** across the five dimensions. Each slider's max is the points still free — at 100 they lock (no perfect teammate).")
+        _dims = [
+            ("Skills complementarity", "Skills", "budget_skills", DEFAULT_WEIGHTS["Skills"]),
+            ("Availability alignment", "Availability", "budget_avail", DEFAULT_WEIGHTS["Availability"]),
+            ("Working-style compatibility", "Working style", "budget_style", DEFAULT_WEIGHTS["Working style"]),
+            ("Goals alignment", "Goals", "budget_goals", DEFAULT_WEIGHTS["Goals"]),
+            ("Reliability", "Reliability", "budget_reliab", DEFAULT_WEIGHTS["Reliability"]),
+        ]
+        _cur = {d: int(st.session_state.get(key, val)) for _, d, key, val in _dims}
+        _cap = lambda d: max(0, 100 - sum(_cur[x] for x in _cur if x != d))
+        w_skills = st.slider("Skills complementarity", 0, _cap("Skills"), _cur["Skills"], key="budget_skills")
+        w_avail = st.slider("Availability alignment", 0, _cap("Availability"), _cur["Availability"], key="budget_avail")
+        w_style = st.slider("Working-style compatibility", 0, _cap("Working style"), _cur["Working style"], key="budget_style")
+        w_goals = st.slider("Goals alignment", 0, _cap("Goals"), _cur["Goals"], key="budget_goals")
+        w_reliab = st.slider("Reliability", 0, _cap("Reliability"), _cur["Reliability"], key="budget_reliab")
         _wtotal = w_skills + w_avail + w_style + w_goals + w_reliab
         if _wtotal == 100:
-            st.caption(f"✅ Allocated **{_wtotal} / 100**")
-        elif _wtotal < 100:
-            st.caption(f"⚠️ Allocated **{_wtotal} / 100** — add **{100 - _wtotal}** more")
+            st.caption("✅ All **100** points allocated — sliders are locked (drop one to free points).")
         else:
-            st.caption(f"⚠️ Allocated **{_wtotal} / 100** — reduce by **{_wtotal - 100}**")
+            st.caption(f"⚠️ **{100 - _wtotal}** point(s) still unallocated.")
 
         st.caption("By submitting, you agree that your answers are stored anonymously (under a generated name) to improve matching.")
         submitted = st.form_submit_button("Find teammates")
@@ -1149,7 +1156,7 @@ else:
         if not roles or not meeting:
             st.warning("Please pick at least one role and one meeting time.")
         elif _wtotal != 100:
-            st.error(f"Priority weights must total exactly 100 (currently {_wtotal}). Adjust the five values and resubmit.")
+            st.error(f"Priority weights must total 100 — {100 - _wtotal} point(s) still unallocated. Drag a slider up to spend them.")
         else:
             st.session_state.user = {
                 "course": course, "roles": roles, "hours": hours, "meeting": meeting,
