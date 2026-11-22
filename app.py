@@ -158,12 +158,68 @@ MAJOR_PROFILES = {
 }
 
 
-def _major_stats(major, rng=None):
-    """Base 7-axis profile for a major, optionally with small per-person jitter."""
+# Overall admission difficulty + reputation offset per major (additive, applied to all 7 axes).
+# Grounded in JUPAS entry scores / program competitiveness: quantitative-finance and business
+# programs sit highest, engineering/sciences mid, humanities and niche science lower.
+MAJOR_TIER = {
+    "Quantitative Finance (QFIN)": 15,
+    "Global Business (GBUS)": 12,
+    "Economics and Finance (ECOF)": 11,
+    "Risk Management and Business Intelligence (RMBI)": 8,
+    "Computer Science (COMP)": 7,
+    "Data Science and Technology (DSCT)": 7,
+    "Information Systems (IS)": 7,
+    "Computer Engineering (CPEG)": 6,
+    "Finance (FINA)": 6,
+    "Economics (ECON)": 5,
+    "Mathematics and Economics (MAEC)": 5,
+    "Decision Analytics (DA)": 5,
+    "Mathematics (MATH)": 5,
+    "Electronic Engineering (ELEC)": 4,
+    "Aerospace Engineering (AE)": 4,
+    "Physics (PHYS)": 4,
+    "Sustainable and Green Finance (SGFN)": 4,
+    "Operations Management (OM)": 3,
+    "Mechanical Engineering (MECH)": 2,
+    "Bioengineering (BIEN)": 2,
+    "Integrative Systems and Design (ISD)": 2,
+    "Industrial Engineering and Engineering Management (IEEM)": 2,
+    "Marketing (MARK)": 2,
+    "Management (MGMT)": 2,
+    "Professional Accounting (PACC)": 2,
+    "Biotechnology and Business (BIBU)": 2,
+    "Civil and Environmental Engineering (CIVL)": 1,
+    "Chemical and Environmental Engineering (CEEV)": 1,
+    "Chemistry (CHEM)": 1,
+    "Biochemistry and Cell Biology (BCB)": 1,
+    "Biotechnology (BIOT)": 1,
+    "Environmental Management and Technology (EVMT)": 1,
+    "Sustainable Energy Engineering (SUSEE)": 1,
+    "General Business Management (GBM)": 1,
+    "Quantitative Social Analysis (QSA)": 1,
+    "Individualized Interdisciplinary Major (IIM)": 0,
+    "Ocean Science and Technology (OCES)": -4,
+    "Global China Studies (GCST)": -4,
+}
+
+
+def _clamp_stat(v):
+    return max(30, min(95, v))
+
+
+def major_profile(major):
+    """Content shape (MAJOR_PROFILES) shifted by the major's overall tier (MAJOR_TIER)."""
     base = MAJOR_PROFILES.get(major, {a: 50 for a in RADAR_AXES})
+    off = MAJOR_TIER.get(major, 0)
+    return {a: _clamp_stat(v + off) for a, v in base.items()}
+
+
+def _major_stats(major, rng=None):
+    """Final 7-axis profile for a major, optionally with small per-person jitter."""
+    base = major_profile(major)
     if rng is None:
         return dict(base)
-    return {a: max(30, min(95, v + rng.randint(-8, 8))) for a, v in base.items()}
+    return {a: _clamp_stat(v + rng.randint(-8, 8)) for a, v in base.items()}
 
 
 # Why each major's 7-axis profile is distributed the way it is.
@@ -517,7 +573,7 @@ def _skill_axes(person):
     axes = set()
     for r in person.get("roles", []):
         axes |= set(_ROLE_STAT_BONUS.get(r, {}).keys())
-    prof = MAJOR_PROFILES.get(person.get("major", ""), {})
+    prof = major_profile(person.get("major", ""))
     axes |= {a for a, v in prof.items() if v >= 60}
     return axes
 
@@ -689,8 +745,12 @@ def radar_svg(stats, size=300):
 def major_profiles_html():
     """Clickable accordion: major name -> radar + rationale with a geometric reveal."""
     items = []
-    for i, (major, prof) in enumerate(MAJOR_PROFILES.items(), 1):
+    for i, major in enumerate(MAJOR_PROFILES.keys(), 1):
+        prof = major_profile(major)
         why = MAJOR_RATIONALE.get(major, "")
+        off = MAJOR_TIER.get(major, 0)
+        tier = ("Elite" if off >= 10 else "High" if off >= 6 else "Solid" if off >= 1
+                else "Average" if off >= 0 else "Below avg")
         ranked = sorted(prof.items(), key=lambda kv: kv[1], reverse=True)
         strong = ranked[:2]
         weak = sorted(prof.items(), key=lambda kv: kv[1])[:2]
@@ -705,6 +765,7 @@ def major_profiles_html():
             f'<div class="sm-radar">{radar_svg(prof)}</div>'
             '<div class="sm-major-info">'
             f'<p class="sm-major-why">{why}</p>'
+            f'<div class="sm-major-tags"><span class="sm-mtag-lbl">Level</span><span class="sm-mtag tier">{tier}</span></div>'
             f'<div class="sm-major-tags"><span class="sm-mtag-lbl">Strong</span>{strong_html}</div>'
             f'<div class="sm-major-tags"><span class="sm-mtag-lbl">Weaker</span>{weak_html}</div>'
             '</div></div></div></details>'
@@ -1185,6 +1246,7 @@ details.sm-major[open] .sm-major-body { animation: majorReveal 0.34s cubic-bezie
 .sm-mtag { font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; letter-spacing: 0.03em; padding: 2px 8px; border: 1px solid var(--line-2); color: var(--muted); }
 .sm-mtag.hi { border-color: rgba(217,119,110,0.5); color: var(--red); }
 .sm-mtag.lo { border-color: var(--line); color: var(--faint); }
+.sm-mtag.tier { border-color: rgba(125,155,198,0.5); color: var(--blue); }
 @media (prefers-reduced-motion: reduce) { details.sm-major[open] .sm-major-body { animation: none !important; } }
 </style>
 
