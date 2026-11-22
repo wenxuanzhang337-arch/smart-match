@@ -1128,12 +1128,19 @@ else:
         suggestion = st.text_area("Any suggestions for the system? (optional)")
 
         st.markdown(section("08", "Priority weights"), unsafe_allow_html=True)
-        st.caption("Slide to set how much each dimension matters to you — they're normalized automatically.")
-        w_skills = st.slider("Skills complementarity", 0, 100, DEFAULT_WEIGHTS["Skills"], key="w_skills")
-        w_avail = st.slider("Availability alignment", 0, 100, DEFAULT_WEIGHTS["Availability"], key="w_avail")
-        w_style = st.slider("Working-style compatibility", 0, 100, DEFAULT_WEIGHTS["Working style"], key="w_style")
-        w_goals = st.slider("Goals alignment", 0, 100, DEFAULT_WEIGHTS["Goals"], key="w_goals")
-        w_reliab = st.slider("Reliability", 0, 100, DEFAULT_WEIGHTS["Reliability"], key="w_reliab")
+        st.caption("Split **100 points** across the five dimensions (must total exactly 100). You can't max everything — just like there's no perfect teammate.")
+        w_skills = st.number_input("Skills complementarity", 0, 100, DEFAULT_WEIGHTS["Skills"], 5, key="w_skills")
+        w_avail = st.number_input("Availability alignment", 0, 100, DEFAULT_WEIGHTS["Availability"], 5, key="w_avail")
+        w_style = st.number_input("Working-style compatibility", 0, 100, DEFAULT_WEIGHTS["Working style"], 5, key="w_style")
+        w_goals = st.number_input("Goals alignment", 0, 100, DEFAULT_WEIGHTS["Goals"], 5, key="w_goals")
+        w_reliab = st.number_input("Reliability", 0, 100, DEFAULT_WEIGHTS["Reliability"], 5, key="w_reliab")
+        _wtotal = w_skills + w_avail + w_style + w_goals + w_reliab
+        if _wtotal == 100:
+            st.caption(f"✅ Allocated **{_wtotal} / 100**")
+        elif _wtotal < 100:
+            st.caption(f"⚠️ Allocated **{_wtotal} / 100** — add **{100 - _wtotal}** more")
+        else:
+            st.caption(f"⚠️ Allocated **{_wtotal} / 100** — reduce by **{_wtotal - 100}**")
 
         st.caption("By submitting, you agree that your answers are stored anonymously (under a generated name) to improve matching.")
         submitted = st.form_submit_button("Find teammates")
@@ -1141,6 +1148,8 @@ else:
     if submitted:
         if not roles or not meeting:
             st.warning("Please pick at least one role and one meeting time.")
+        elif _wtotal != 100:
+            st.error(f"Priority weights must total exactly 100 (currently {_wtotal}). Adjust the five values and resubmit.")
         else:
             st.session_state.user = {
                 "course": course, "roles": roles, "hours": hours, "meeting": meeting,
