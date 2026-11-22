@@ -1162,12 +1162,17 @@ else:
         ("Reliability", "Reliability", "bw_reliab"),
     ]
     _wcur = {d: int(st.session_state.get(key, 0)) for _, d, key in _wdims}
-    _cap = lambda d: max(0, 100 - sum(_wcur[x] for x in _wcur if x != d))
-    w_skills = st.slider("Skills complementarity", 0, _cap("Skills"), _wcur["Skills"], key="bw_skills")
-    w_avail = st.slider("Availability alignment", 0, _cap("Availability"), _wcur["Availability"], key="bw_avail")
-    w_style = st.slider("Working-style compatibility", 0, _cap("Working style"), _wcur["Working style"], key="bw_style")
-    w_goals = st.slider("Goals alignment", 0, _cap("Goals"), _wcur["Goals"], key="bw_goals")
-    w_reliab = st.slider("Reliability", 0, _cap("Reliability"), _wcur["Reliability"], key="bw_reliab")
+    def _bw_slider(label, d, key):
+        cap = max(0, 100 - sum(_wcur[x] for x in _wcur if x != d))
+        val = _wcur[d]
+        if cap <= 0:
+            return st.slider(label, 0, 1, val, key=key, disabled=True)
+        return st.slider(label, 0, cap, val, key=key)
+    w_skills = _bw_slider("Skills complementarity", "Skills", "bw_skills")
+    w_avail = _bw_slider("Availability alignment", "Availability", "bw_avail")
+    w_style = _bw_slider("Working-style compatibility", "Working style", "bw_style")
+    w_goals = _bw_slider("Goals alignment", "Goals", "bw_goals")
+    w_reliab = _bw_slider("Reliability", "Reliability", "bw_reliab")
     _wtotal = w_skills + w_avail + w_style + w_goals + w_reliab
     if _wtotal == 100:
         st.caption("✅ All **100** points allocated — sliders are locked.")
