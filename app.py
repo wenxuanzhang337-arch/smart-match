@@ -114,6 +114,57 @@ _ROLE_STAT_BONUS = {
     "Coordination / team leader": {"Leadership": 22},
 }
 
+# Base 7-axis skill profile per HKUST major, derived from typical learning content.
+# Rough priors (0-100); they blend with a student's own role history in the stats.
+MAJOR_PROFILES = {
+    "Aerospace Engineering (AE)": {"Code": 65, "Writing": 55, "Speaking": 45, "Planning": 70, "Data": 60, "Design": 60, "Leadership": 40},
+    "Biochemistry and Cell Biology (BCB)": {"Code": 45, "Writing": 65, "Speaking": 45, "Planning": 55, "Data": 60, "Design": 40, "Leadership": 40},
+    "Bioengineering (BIEN)": {"Code": 60, "Writing": 55, "Speaking": 45, "Planning": 60, "Data": 60, "Design": 45, "Leadership": 40},
+    "Biotechnology (BIOT)": {"Code": 45, "Writing": 60, "Speaking": 45, "Planning": 55, "Data": 60, "Design": 40, "Leadership": 40},
+    "Biotechnology and Business (BIBU)": {"Code": 45, "Writing": 60, "Speaking": 55, "Planning": 60, "Data": 60, "Design": 40, "Leadership": 55},
+    "Chemical and Environmental Engineering (CEEV)": {"Code": 55, "Writing": 60, "Speaking": 40, "Planning": 60, "Data": 55, "Design": 40, "Leadership": 40},
+    "Chemistry (CHEM)": {"Code": 40, "Writing": 60, "Speaking": 40, "Planning": 55, "Data": 55, "Design": 40, "Leadership": 40},
+    "Civil and Environmental Engineering (CIVL)": {"Code": 50, "Writing": 60, "Speaking": 45, "Planning": 65, "Data": 50, "Design": 55, "Leadership": 45},
+    "Computer Engineering (CPEG)": {"Code": 85, "Writing": 45, "Speaking": 40, "Planning": 55, "Data": 70, "Design": 40, "Leadership": 40},
+    "Computer Science (COMP)": {"Code": 92, "Writing": 45, "Speaking": 40, "Planning": 50, "Data": 80, "Design": 40, "Leadership": 40},
+    "Data Science and Technology (DSCT)": {"Code": 80, "Writing": 50, "Speaking": 45, "Planning": 55, "Data": 90, "Design": 45, "Leadership": 45},
+    "Decision Analytics (DA)": {"Code": 60, "Writing": 55, "Speaking": 50, "Planning": 60, "Data": 80, "Design": 45, "Leadership": 50},
+    "Economics (ECON)": {"Code": 45, "Writing": 65, "Speaking": 55, "Planning": 55, "Data": 70, "Design": 40, "Leadership": 45},
+    "Economics and Finance (ECOF)": {"Code": 45, "Writing": 60, "Speaking": 55, "Planning": 55, "Data": 75, "Design": 40, "Leadership": 45},
+    "Electronic Engineering (ELEC)": {"Code": 80, "Writing": 45, "Speaking": 40, "Planning": 55, "Data": 60, "Design": 40, "Leadership": 40},
+    "Environmental Management and Technology (EVMT)": {"Code": 45, "Writing": 65, "Speaking": 55, "Planning": 65, "Data": 55, "Design": 45, "Leadership": 55},
+    "Finance (FINA)": {"Code": 45, "Writing": 55, "Speaking": 55, "Planning": 55, "Data": 75, "Design": 40, "Leadership": 50},
+    "General Business Management (GBM)": {"Code": 35, "Writing": 60, "Speaking": 65, "Planning": 65, "Data": 55, "Design": 45, "Leadership": 70},
+    "Global Business (GBUS)": {"Code": 35, "Writing": 60, "Speaking": 70, "Planning": 60, "Data": 55, "Design": 45, "Leadership": 70},
+    "Global China Studies (GCST)": {"Code": 30, "Writing": 75, "Speaking": 65, "Planning": 50, "Data": 45, "Design": 40, "Leadership": 50},
+    "Individualized Interdisciplinary Major (IIM)": {"Code": 50, "Writing": 55, "Speaking": 55, "Planning": 55, "Data": 55, "Design": 55, "Leadership": 55},
+    "Industrial Engineering and Engineering Management (IEEM)": {"Code": 50, "Writing": 60, "Speaking": 55, "Planning": 75, "Data": 65, "Design": 45, "Leadership": 60},
+    "Information Systems (IS)": {"Code": 70, "Writing": 55, "Speaking": 55, "Planning": 65, "Data": 75, "Design": 45, "Leadership": 55},
+    "Integrative Systems and Design (ISD)": {"Code": 55, "Writing": 50, "Speaking": 55, "Planning": 60, "Data": 50, "Design": 85, "Leadership": 55},
+    "Management (MGMT)": {"Code": 35, "Writing": 60, "Speaking": 65, "Planning": 65, "Data": 50, "Design": 45, "Leadership": 75},
+    "Marketing (MARK)": {"Code": 35, "Writing": 65, "Speaking": 70, "Planning": 60, "Data": 55, "Design": 70, "Leadership": 55},
+    "Mathematics (MATH)": {"Code": 70, "Writing": 55, "Speaking": 40, "Planning": 55, "Data": 70, "Design": 40, "Leadership": 40},
+    "Mathematics and Economics (MAEC)": {"Code": 60, "Writing": 55, "Speaking": 45, "Planning": 55, "Data": 75, "Design": 40, "Leadership": 45},
+    "Mechanical Engineering (MECH)": {"Code": 60, "Writing": 50, "Speaking": 45, "Planning": 60, "Data": 55, "Design": 65, "Leadership": 45},
+    "Ocean Science and Technology (OCES)": {"Code": 50, "Writing": 55, "Speaking": 45, "Planning": 55, "Data": 60, "Design": 40, "Leadership": 45},
+    "Operations Management (OM)": {"Code": 50, "Writing": 55, "Speaking": 55, "Planning": 75, "Data": 65, "Design": 45, "Leadership": 60},
+    "Physics (PHYS)": {"Code": 65, "Writing": 55, "Speaking": 40, "Planning": 55, "Data": 65, "Design": 40, "Leadership": 40},
+    "Professional Accounting (PACC)": {"Code": 45, "Writing": 60, "Speaking": 50, "Planning": 65, "Data": 60, "Design": 40, "Leadership": 45},
+    "Quantitative Finance (QFIN)": {"Code": 60, "Writing": 55, "Speaking": 50, "Planning": 55, "Data": 80, "Design": 40, "Leadership": 45},
+    "Quantitative Social Analysis (QSA)": {"Code": 55, "Writing": 65, "Speaking": 55, "Planning": 55, "Data": 75, "Design": 40, "Leadership": 45},
+    "Risk Management and Business Intelligence (RMBI)": {"Code": 55, "Writing": 55, "Speaking": 55, "Planning": 60, "Data": 80, "Design": 40, "Leadership": 50},
+    "Sustainable and Green Finance (SGFN)": {"Code": 40, "Writing": 60, "Speaking": 55, "Planning": 60, "Data": 65, "Design": 40, "Leadership": 50},
+    "Sustainable Energy Engineering (SUSEE)": {"Code": 55, "Writing": 55, "Speaking": 45, "Planning": 60, "Data": 55, "Design": 45, "Leadership": 45},
+}
+
+
+def _major_stats(major, rng=None):
+    """Base 7-axis profile for a major, optionally with small per-person jitter."""
+    base = MAJOR_PROFILES.get(major, {a: 50 for a in RADAR_AXES})
+    if rng is None:
+        return dict(base)
+    return {a: max(30, min(95, v + rng.randint(-8, 8))) for a, v in base.items()}
+
 
 def build_sample_library(n=50, seed=7):
     rng = random.Random(seed)
@@ -132,7 +183,8 @@ def build_sample_library(n=50, seed=7):
         seen_emails.add(email)
 
         roles = rng.sample(ALL_ROLES, rng.choice([1, 2, 2, 3]))
-        stats = {axis: rng.randint(42, 78) for axis in RADAR_AXES}
+        major = rng.choice(_MAJORS)
+        stats = _major_stats(major, rng)
         for r in roles:
             for axis, bonus in _ROLE_STAT_BONUS[r].items():
                 stats[axis] = min(95, stats[axis] + bonus)
@@ -142,7 +194,7 @@ def build_sample_library(n=50, seed=7):
         course = "COMP1945" if rng.random() < 0.62 else rng.choice(_OTHER_COURSES)
 
         students.append({
-            "name": name, "email": email, "major": rng.choice(_MAJORS),
+            "name": name, "email": email, "major": major,
             "year": rng.choice(["Year 1", "Year 2", "Year 3", "Year 4"]),
             "course": course, "roles": roles,
             "hours": rng.choice(HOURS),
@@ -240,7 +292,7 @@ def make_anonymized_profile(user, major):
     if name is None:
         n = len(pool) + 1
         name, email = f"Student {n}", f"student{n}@connect.ust.hk"
-    stats = {axis: rng.randint(42, 78) for axis in RADAR_AXES}
+    stats = _major_stats(major, rng)
     for r in user["roles"]:
         for axis, bonus in _ROLE_STAT_BONUS.get(r, {}).items():
             stats[axis] = min(95, stats[axis] + bonus)
@@ -381,17 +433,35 @@ DEFAULT_WEIGHTS = {
 }
 
 
+def _skill_axes(person):
+    """Strong skill axes implied by a person's roles plus their major's learning content."""
+    axes = set()
+    for r in person.get("roles", []):
+        axes |= set(_ROLE_STAT_BONUS.get(r, {}).keys())
+    prof = MAJOR_PROFILES.get(person.get("major", ""), {})
+    axes |= {a for a, v in prof.items() if v >= 60}
+    return axes
+
+
 def score_roles(user, cand):
-    """Complementarity: do they cover roles I lack, without merely duplicating what I already do?"""
+    """Complementarity: do they cover roles/skills I lack, without merely duplicating what I already do?"""
     my = set(user["roles"])
     their = set(cand["roles"])
-    if not their:
-        return 0.0
-    brings = their - my
-    overlap = their & my
-    novelty = len(brings) / len(their)
-    duplication = len(overlap) / len(their)
-    return max(0.0, novelty - 0.5 * duplication)
+    if their:
+        brings = their - my
+        overlap = their & my
+        role_score = max(0.0, len(brings) / len(their) - 0.5 * len(overlap) / len(their))
+    else:
+        role_score = 0.0
+    u_axes = _skill_axes(user)
+    c_axes = _skill_axes(cand)
+    if c_axes:
+        s_brings = c_axes - u_axes
+        s_overlap = c_axes & u_axes
+        skill_score = max(0.0, len(s_brings) / len(c_axes) - 0.5 * len(s_overlap) / len(c_axes))
+    else:
+        skill_score = 0.0
+    return 0.6 * role_score + 0.4 * skill_score
 
 
 def score_availability(user, cand):
