@@ -1153,31 +1153,17 @@ else:
     suggestion = st.text_area("Any suggestions for the system? (optional)")
 
     st.markdown(section("08", "Priority weights"), unsafe_allow_html=True)
-    st.caption("Allocate **100 points** across the five dimensions. Every slider starts at 0; the total can never exceed 100 — at 100 they lock until you drop one.")
-    _wdims = [
-        ("Skills complementarity", "Skills", "bw_skills"),
-        ("Availability alignment", "Availability", "bw_avail"),
-        ("Working-style compatibility", "Working style", "bw_style"),
-        ("Goals alignment", "Goals", "bw_goals"),
-        ("Reliability", "Reliability", "bw_reliab"),
-    ]
-    _wcur = {d: int(st.session_state.get(key, 0)) for _, d, key in _wdims}
-    def _bw_slider(label, d, key):
-        cap = max(0, 100 - sum(_wcur[x] for x in _wcur if x != d))
-        val = _wcur[d]
-        if cap <= 0:
-            return st.slider(label, 0, 1, val, key=key, disabled=True)
-        return st.slider(label, 0, cap, val, key=key)
-    w_skills = _bw_slider("Skills complementarity", "Skills", "bw_skills")
-    w_avail = _bw_slider("Availability alignment", "Availability", "bw_avail")
-    w_style = _bw_slider("Working-style compatibility", "Working style", "bw_style")
-    w_goals = _bw_slider("Goals alignment", "Goals", "bw_goals")
-    w_reliab = _bw_slider("Reliability", "Reliability", "bw_reliab")
+    st.caption("Five sliders, each **0–100** (aligned and identical). Their total must stay **≤ 100** — a live total is shown below.")
+    w_skills = st.slider("Skills complementarity", 0, 100, 0, key="uw_skills")
+    w_avail = st.slider("Availability alignment", 0, 100, 0, key="uw_avail")
+    w_style = st.slider("Working-style compatibility", 0, 100, 0, key="uw_style")
+    w_goals = st.slider("Goals alignment", 0, 100, 0, key="uw_goals")
+    w_reliab = st.slider("Reliability", 0, 100, 0, key="uw_reliab")
     _wtotal = w_skills + w_avail + w_style + w_goals + w_reliab
-    if _wtotal == 100:
-        st.caption("✅ All **100** points allocated — sliders are locked.")
+    if _wtotal <= 100:
+        st.caption(f"Allocated **{_wtotal} / 100** — {100 - _wtotal} point(s) free.")
     else:
-        st.caption(f"⚠️ **{100 - _wtotal}** point(s) left to allocate.")
+        st.caption(f"⚠️ **{_wtotal} / 100** — over by **{_wtotal - 100}**, reduce before submitting.")
 
     st.caption("By submitting, you agree that your answers are stored anonymously (under a generated name) to improve matching.")
     submitted = st.button("Find teammates", type="primary", use_container_width=True)
@@ -1187,6 +1173,8 @@ else:
             st.warning("Please pick at least one role and one meeting time.")
         elif _wtotal == 0:
             st.warning("Please allocate at least a few points across the five priority dimensions.")
+        elif _wtotal > 100:
+            st.error(f"The five priorities total {_wtotal}, but they must not exceed 100. Reduce some sliders.")
         else:
             st.session_state.user = {
                 "course": course, "roles": roles, "hours": hours, "meeting": meeting,
