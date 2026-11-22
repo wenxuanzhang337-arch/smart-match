@@ -927,8 +927,8 @@ details[open] summary::after { content: "-"; }
 .sm-detail-grid { display: grid; grid-template-columns: 300px 1fr; gap: 26px; align-items: start; }
 .sm-radar { display: flex; justify-content: center; }
 
-.sm-bar { display: grid; grid-template-columns: 128px 1fr 46px; align-items: center; gap: 12px; margin: 8px 0; }
-.sm-bar-label { font-size: 0.7rem; letter-spacing: 0.07em; text-transform: uppercase; color: #9ca3af; }
+.sm-bar { display: grid; grid-template-columns: 150px 1fr 46px; align-items: center; gap: 12px; margin: 8px 0; }
+.sm-bar-label { font-size: 0.68rem; letter-spacing: 0.04em; text-transform: uppercase; color: #9ca3af; white-space: nowrap; }
 .sm-bar-track { background: #26262c; height: 6px; overflow: hidden; }
 .sm-bar-fill { background: #f4a340; height: 6px; display: block; }
 .sm-bar-val { font-size: 0.82rem; color: #f4a340; text-align: right; font-weight: 600; }
@@ -961,6 +961,36 @@ details[open] summary::after { content: "-"; }
 .sm-launch-ring.r2 { animation: smORing 1.3s ease-out 0.35s infinite; }
 .sm-launch-shard { position: absolute; left: -45vw; top: -10%; height: 120%; width: 34vw; background: linear-gradient(180deg, rgba(244,163,64,0.9), rgba(244,163,64,0.2)); transform: rotate(-18deg); animation: smShardSweep 0.65s ease-in forwards; opacity: 0; }
 @keyframes smShardSweep { 0% { left: -45vw; opacity: 0; } 12% { opacity: 1; } 100% { left: 118vw; opacity: 1; } }
+
+/* responsive: single-column detail layout + tighter padding on narrow screens */
+@media (max-width: 720px) {
+  .block-container, [data-testid="stMainBlockContainer"] { padding-left: 1rem; padding-right: 1rem; padding-top: 1.2rem; }
+  [data-testid="stForm"] { padding: 22px 16px; }
+  .sm-logo { font-size: 2rem; }
+  .sm-hero-title { font-size: 1.55rem; }
+  .sm-sonar { width: 190px; height: 190px; }
+  .sm-detail-grid { grid-template-columns: 1fr; gap: 18px; }
+  .sm-radar { justify-content: flex-start; }
+  .sm-bar { grid-template-columns: 1fr 44px; row-gap: 4px; }
+  .sm-bar-label { grid-column: 1 / -1; }
+  .sm-card { padding: 14px 16px; }
+  .sm-card-head { flex-wrap: wrap; gap: 8px 12px; }
+  .sm-overlay-text, .sm-launch-text { font-size: 2rem; letter-spacing: 0.16em; }
+}
+
+/* accessibility: honor reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .sm-dot, .sm-ember, .sm-star, .sm-scan, .sm-sweep, .sm-blip,
+  .sm-spark, .sm-launch-shard, .sm-overlay-ring, .sm-launch-ring, .sm-card {
+    animation: none !important;
+  }
+  /* full-screen transitions must still disappear instantly so they never block the view */
+  .sm-overlay, .sm-launch {
+    animation: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+}
 </style>
 
 <div class="sm-scan"></div>
