@@ -32,3 +32,15 @@ create policy "anon_insert" on public.respondents
 
 -- Tables created via raw SQL need this grant for the anon role to reach them.
 grant select, insert on public.respondents to anon;
+
+-- Comments / feedback (for the sidebar "Feedback" section).
+create table if not exists public.comments (
+  id          uuid primary key default gen_random_uuid(),
+  author      text,
+  body        text not null,
+  created_at  timestamptz default now()
+);
+alter table public.comments enable row level security;
+create policy "anon_read_comments" on public.comments for select using (true);
+create policy "anon_insert_comments" on public.comments for insert with check (true);
+grant select, insert on public.comments to anon;

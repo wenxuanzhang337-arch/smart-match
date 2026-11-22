@@ -269,6 +269,42 @@ def save_respondent(profile):
         return False
 
 
+def _comments_url():
+    base = st.secrets.get("SUPABASE_URL", "").strip().rstrip("/")
+    return f"{base}/rest/v1/comments" if base else ""
+
+
+def fetch_comments():
+    """Return a list of {author, body, created_at}, newest first."""
+    url = _comments_url()
+    if not url:
+        return []
+    try:
+        r = requests.get(f"{url}?select=*&order=created_at.desc", headers=_supabase_headers(), timeout=15)
+        if r.status_code != 200:
+            return []
+        return [{
+            "author": row.get("author") or "Anonymous",
+            "body": row.get("body") or "",
+            "created_at": row.get("created_at") or "",
+        } for row in r.json()]
+    except Exception:
+        return []
+
+
+def save_comment(author, body):
+    """Insert one comment into Supabase. Returns True on success."""
+    url = _comments_url()
+    if not url or not st.secrets.get("SUPABASE_ANON_KEY", ""):
+        return False
+    try:
+        r = requests.post(url, headers={**_supabase_headers(), "Prefer": "return=minimal"},
+                          json={"author": author, "body": body}, timeout=15)
+        return r.status_code in (200, 201, 204)
+    except Exception:
+        return False
+
+
 @st.cache_data(ttl=600, show_spinner=False)
 def candidate_pool():
     """Mock library + all anonymized respondents, used for matching and browsing."""
@@ -1071,6 +1107,23 @@ details[open] summary::after { content: "[−]"; }
 if "view" not in st.session_state:
     st.session_state.view = "intro"
 
+# --- collapsible left navigation ---
+with st.sidebar:
+    st.markdown("### SMART MATCH")
+    st.caption("Navigation")
+    st.divider()
+    for _label, _view in [
+        ("Home", "intro"),
+        ("Questionnaire", "form"),
+        ("Database", "library"),
+        ("Major Profiles", "profiles"),
+        ("How It Works", "logic"),
+        ("Feedback", "comments"),
+    ]:
+        if st.button(_label, use_container_width=True, key=f"nav_{_view}"):
+            st.session_state.view = _view
+            st.rerun()
+
 if st.session_state.view == "intro":
     # --- title screen ---
     if not st.session_state.get("boot_played"):
@@ -1186,6 +1239,50 @@ elif st.session_state.view == "library":
 
     st.caption(f"{len(students)} / {len(pool)} profiles match")
     render_library_cards(students)
+
+elif st.session_state.view == "profiles":
+    # --- major 7-axis profile summary ---
+    st.markdown(section("00", "Major Profiles"), unsafe_allow_html=True)
+    st.caption("Base 7-axis skill priors per major (0–100), blended with each student's own role history in matching.")
+    rows = [{"Major": m, **p} for m, p in MAJOR_PROFILES.items()]
+    st.dataframe(rows, use_container_width=True, hide_index=True, height=560)
+
+elif st.session_state.view == "logic":
+    # --- how the matching works ---
+    st.markdown(section("00", "How It Works"), unsafe_allow_html=True)
+    st.markdown(
+        "**1 · Five dimensions** — every candidate is scored 0–1 on five research-grounded criteria:\n\n"
+        "- **Skills** — complementarity: the roles *and* major-driven skills they bring that you lack.\n"
+        "- **Availability** — overlapping meeting times + similar weekly commitment.\n"
+        "- **Working style** — discussion, decision and deadline habits.\n"
+        "- **Goals** — target grade and effort expectations.\n"
+        "- **Reliability** — track record of delivering on time.\n\n"
+        "**2 · Your weights** — five sliders, each 0–100, normalized into percentages.\n\n"
+        "**3 · TOPSIS ranking** — multi-criteria decision analysis: every candidate is measured against an ideal *best* and an anti-ideal *worst* profile; closeness to the ideal sets the rank.\n\n"
+        "**4 · Greedy team assembly** — from the shortlist, teammates are added one by one, each chosen to maximize the team's combined coverage of the seven ability axes (Code, Writing, Speaking, Planning, Data, Design, Leadership).\n\n"
+        "**5 · Major profiles** — each candidate's skill radar starts from a fixed base profile of their major (its learning content), then adds their own role history, anchoring recommendations in what a major actually trains."
+    )
+
+elif st.session_state.view == "comments":
+    # --- feedback / comments ---
+    st.markdown(section("00", "Feedback"), unsafe_allow_html=True)
+    st.caption("Comments and suggestions about the questionnaire or the site — stored anonymously.")
+    c_author = st.text_input("Your name (optional)", key="c_author")
+    c_body = st.text_area("Comment / suggestion", key="c_body")
+    if st.button("Submit comment", type="primary", use_container_width=True):
+        if not c_body.strip():
+            st.warning("Please write a comment first.")
+        elif save_comment((c_author or "Anonymous").strip(), c_body.strip()):
+            st.success("Thanks — your comment has been posted.")
+        else:
+            st.warning("Couldn't reach the database (check Supabase setup).")
+    st.divider()
+    comments = fetch_comments()
+    if not comments:
+        st.caption("No comments yet — be the first.")
+    else:
+        for c in comments:
+            st.markdown(f"**{c['author']}** · *{c['created_at'][:10]}*  \n{c['body']}", unsafe_allow_html=True)
 
 else:
     # --- questionnaire view ---
