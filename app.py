@@ -1708,16 +1708,96 @@ elif st.session_state.view == "logic":
     # --- how the matching works ---
     st.markdown(section("00", "How It Works"), unsafe_allow_html=True)
     st.markdown(
-        "**1 · Five dimensions** — every candidate is scored 0–1 on five research-grounded criteria:\n\n"
-        "- **Skills** — complementarity: the roles *and* major-driven skills they bring that you lack.\n"
-        "- **Availability** — overlapping meeting times + similar weekly commitment.\n"
-        "- **Working style** — discussion, decision and deadline habits.\n"
-        "- **Goals** — target grade and effort expectations.\n"
-        "- **Reliability** — track record of delivering on time.\n\n"
-        "**2 · Your weights** — five sliders, each 0–100, normalized into percentages.\n\n"
-        "**3 · TOPSIS ranking** — multi-criteria decision analysis: every candidate is measured against an ideal *best* and an anti-ideal *worst* profile; closeness to the ideal sets the rank.\n\n"
-        "**4 · Greedy team assembly** — from the shortlist, teammates are added one by one, each chosen to maximize the team's combined coverage of the seven ability axes (Code, Writing, Speaking, Planning, Data, Design, Leadership).\n\n"
-        "**5 · Major profiles** — each candidate's skill radar starts from a fixed base profile of their major (its learning content), then adds their own role history, anchoring recommendations in what a major actually trains."
+        "Matching runs in **two stages + one AI layer**:\n\n"
+        "1. **TOPSIS ranking** — score every candidate on five weighted dimensions, then rank them.\n"
+        "2. **Greedy team assembly** — pick teammates that together maximize seven-axis skill coverage, then fix gender balance.\n"
+        "3. **AI analysis** — explain each recommendation (and, in Team Analysis, the whole team).\n\n"
+        "Every formula and its source is below."
+    )
+
+    st.markdown(section("01", "Candidate 7-axis skill profile"), unsafe_allow_html=True)
+    st.markdown(
+        "Each candidate's skill radar (Code, Writing, Speaking, Planning, Data, Design, Leadership) is built as:\n\n"
+        "```\noffset        = round((admission_tier + entry_barrier) × 1.5)\n"
+        "profile[axis] = clamp( base_major[axis] + offset, 30, 95 )\n"
+        "stats[axis]   = clamp( profile[axis] + jitter(±8), 30, 95 )\n"
+        "             + 22 for each self-reported role that maps to that axis\n```\n\n"
+        "`base_major` is a hand-tuned 0–100 prior per HKUST major (its typical learning content); `admission_tier` and "
+        "`entry_barrier` are per-major offsets from JUPAS competitiveness and entry difficulty. This is a *domain-knowledge "
+        "prior*, not a learned model."
+    )
+
+    st.markdown(section("02", "Ordinal similarity"), unsafe_allow_html=True)
+    st.markdown(
+        "For ordered multiple-choice answers (hours, grade, deadline, reliability), a linear distance similarity is used:\n\n"
+        "```\nordinal(a, b) = 1                                  if a == b\n"
+        "               = max(0, 1 − |pos(a) − pos(b)| / (n − 1))  otherwise\n```\n\n"
+        "Adjacent options score highest; the two extremes score 0. (Idea from rank correlation — see Spearman below.)"
+    )
+
+    st.markdown(section("03", "Five matching dimensions"), unsafe_allow_html=True)
+    st.markdown(
+        "Each candidate is scored 0–1 on five criteria (let *my* = you, *their* = candidate):\n\n"
+        "**1. Skills (complementarity)** — do they cover roles/skills I lack, without duplicating me?\n"
+        "```\nrole_score  = max(0, |their_roles − my_roles| / |their_roles|\n"
+        "                     − 0.5 × |their_roles ∩ my_roles| / |their_roles|)\n"
+        "skill_score = same formula over 'strong axes' (role axes + major axes ≥ 60)\n"
+        "Skills      = 0.6 × role_score + 0.4 × skill_score\n```\n\n"
+        "**2. Availability** — meeting overlap + weekly commitment.\n"
+        "```\ntime_score   = |my_meeting ∩ their_meeting| / max(|my_meeting ∪ their_meeting|, 1)   (Jaccard)\n"
+        "hours_score  = ordinal(my_hours, their_hours)\n"
+        "load_penalty = 0.1 if they have internship / part-time / job-hunting\n"
+        "Availability = max(0, 0.6 × time_score + 0.4 × hours_score − load_penalty)\n```\n\n"
+        "**3. Working style** — discussion, decision and deadline habits.\n"
+        "```\nWorking style = ( [discussion match ? 1 : 0] + [decision match ? 1 : 0]\n"
+        "                + ordinal(my_deadline, their_deadline) ) / 3\n```\n\n"
+        "**4. Goals** — target grade and expectations.\n"
+        "```\nGoals = 0.5 × ordinal(my_grade, their_grade)\n"
+        "      + 0.5 × ( [expectations match ? 1 : 0.5] )\n```\n\n"
+        "**5. Reliability** — delivery punctuality.\n"
+        "```\nReliability = ordinal(my_reliability, their_reliability)\n```"
+    )
+
+    st.markdown(section("04", "Priority weights"), unsafe_allow_html=True)
+    st.markdown(
+        "Your five sliders (each 0–100) are normalized to sum to 1:\n\n"
+        "```\nnormalized_w[k] = w[k] / (w[Skills] + w[Availability] + w[Working style] + w[Goals] + w[Reliability])\n```"
+    )
+
+    st.markdown(section("05", "TOPSIS ranking"), unsafe_allow_html=True)
+    st.markdown(
+        "TOPSIS (*Technique for Order of Preference by Similarity to Ideal Solution*) ranks candidates by closeness to an "
+        "ideal best and distance from an anti-ideal worst:\n\n"
+        "```\n1. vector normalize:  n_j = sqrt( Σ_i r_ij² )            (r_ij = criterion j of candidate i)\n"
+        "2. weight:            v_ij = (r_ij / n_j) × w_j\n"
+        "3. ideal best/worst:  A+_j = max_i v_ij ;  A−_j = min_i v_ij\n"
+        "4. distances:         S+_i = sqrt( Σ_j (v_ij − A+_j)² )\n"
+        "                      S−_i = sqrt( Σ_j (v_ij − A−_j)² )\n"
+        "5. closeness:         C_i = S−_i / (S+_i + S−_i)\n```\n\n"
+        "Rank by `C_i` descending (0–1, higher = better)."
+    )
+
+    st.markdown(section("06", "Greedy team assembly"), unsafe_allow_html=True)
+    st.markdown(
+        "From the ranked pool, pick teammates that **maximize seven-axis coverage** (each axis takes the team maximum):\n\n"
+        "```\ncoverage_gain(candidate) = Σ_axis max(0, candidate[axis] − covered[axis])\n"
+        "repeat: add the candidate with the highest gain, then update covered[axis] = max(covered[axis], candidate[axis])\n```\n\n"
+        "This is the *maximum-coverage* problem (submodular); greedy guarantees a **1 − 1/e ≈ 63%** approximation.\n\n"
+        "A final **gender-balance** pass swaps members so no gender is a lone member (count ≠ 1) — each gender is either "
+        "absent or has ≥ 2 people, preventing isolation."
+    )
+
+    st.markdown(section("07", "References"), unsafe_allow_html=True)
+    st.markdown(
+        "- **TOPSIS** — Hwang & Yoon (1981), *Multiple Attribute Decision Making*. [DOI](https://doi.org/10.1007/978-3-642-48318-9)\n"
+        "- **Team formation** — Lappas, Liu & Terzi (2009), *Finding a Team of Experts in Social Networks*, KDD. [DOI](https://dl.acm.org/doi/10.1145/1557019.1557074)\n"
+        "- **Greedy 1−1/e bound** — Nemhauser, Wolsey & Fisher (1978), *Mathematical Programming*. [DOI](https://doi.org/10.1007/BF01588971)\n"
+        "- **Team roles / complementarity** — Belbin (1981), *Management Teams*. [Site](https://www.belbin.com/about/belbin-team-roles/)\n"
+        "- **Team effectiveness** — Mathieu et al. (2008), *Journal of Management*. [DOI](https://doi.org/10.1177/0149206308316061)\n"
+        "- **Psychological safety** — Edmondson (1999), *Administrative Science Quarterly*. [DOI](https://doi.org/10.2307/2666999)\n"
+        "- **Big Five in teamwork** — Salas, Sims & Burke (2005), *Small Group Research*. [DOI](https://doi.org/10.1177/1046496405277134)\n"
+        "- **Jaccard similarity** — Jaccard (1912), *New Phytologist*. [DOI](https://doi.org/10.1111/j.1469-8137.1912.tb05611.x)\n"
+        "- **Rank correlation** — Spearman (1904), *American Journal of Psychology*. [DOI](https://doi.org/10.2307/1412159)"
     )
 
 elif st.session_state.view == "comments":
