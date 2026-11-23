@@ -673,7 +673,7 @@ def intro_hero():
         '<div class="sm-hero">'
         '<div class="sm-target"><div class="t1"></div><div class="t2"></div><div class="t3"></div></div>'
         '<div class="sm-hero-title">FIND YOUR <span class="accent">TEAM</span></div>'
-        '<div class="sm-tagline">One short questionnaire. Matches scored across five dimensions.</div>'
+        '<div class="sm-tagline">One short questionnaire. Matches scored across seven dimensions.</div>'
         '<div class="sm-chips">'
         '<span class="sm-chip">TOPSIS RANKING</span>'
         '<span class="sm-chip">GREEDY TEAMING</span>'
