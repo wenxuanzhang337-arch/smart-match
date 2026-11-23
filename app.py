@@ -398,7 +398,7 @@ def fetch_respondents():
             "load": row.get("load") or [], "grade": row.get("grade"),
             "expect": row.get("expect"), "discussion": row.get("discussion"),
             "decision": row.get("decision"), "deadline": row.get("deadline"),
-            "reliability": row.get("reliability"), "stats": row.get("stats") or {},
+            "reliability": row.get("reliability"), "weights": row.get("weights") or {}, "stats": row.get("stats") or {},
         } for row in r.json()]
     except Exception:
         return []
@@ -609,7 +609,7 @@ def make_anonymized_profile(user, major):
         "hours": user["hours"], "meeting": list(user["meeting"]), "load": list(user["load"]),
         "grade": user["grade"], "expect": user["expect"],
         "discussion": user["discussion"], "decision": user["decision"],
-        "deadline": user["deadline"], "reliability": user["reliability"],
+        "deadline": user["deadline"], "reliability": user["reliability"], "weights": user.get("weights") or {},
         "stats": stats,
     }
 

@@ -18,6 +18,7 @@ create table if not exists public.respondents (
   decision    text,
   deadline    text,
   reliability text,
+  weights     jsonb default '{}'::jsonb,
   stats       jsonb default '{}'::jsonb,
   created_at  timestamptz default now()
 );
@@ -34,8 +35,9 @@ create policy "anon_insert" on public.respondents
 -- Tables created via raw SQL need this grant for the anon role to reach them.
 grant select, insert on public.respondents to anon;
 
--- For tables created before the gender field existed:
+-- For tables created before the gender/weights fields existed:
 alter table public.respondents add column if not exists gender text;
+alter table public.respondents add column if not exists weights jsonb default '{}'::jsonb;
 
 -- Comments / feedback (for the sidebar "Feedback" section).
 create table if not exists public.comments (
