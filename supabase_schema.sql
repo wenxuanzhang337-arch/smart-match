@@ -44,3 +44,27 @@ alter table public.comments enable row level security;
 create policy "anon_read_comments" on public.comments for select using (true);
 create policy "anon_insert_comments" on public.comments for insert with check (true);
 grant select, insert on public.comments to anon;
+
+-- Reports (举报) + praise (好评) for the sidebar "Report" section.
+create table if not exists public.reports (
+  id          uuid primary key default gen_random_uuid(),
+  target_name text not null,
+  label       text not null,
+  evidence    text,
+  verdict     text default 'pending',
+  created_at  timestamptz default now()
+);
+alter table public.reports enable row level security;
+create policy "anon_read_reports" on public.reports for select using (true);
+create policy "anon_insert_reports" on public.reports for insert with check (true);
+grant select, insert on public.reports to anon;
+
+create table if not exists public.praise (
+  id          uuid primary key default gen_random_uuid(),
+  target_name text not null,
+  created_at  timestamptz default now()
+);
+alter table public.praise enable row level security;
+create policy "anon_read_praise" on public.praise for select using (true);
+create policy "anon_insert_praise" on public.praise for insert with check (true);
+grant select, insert on public.praise to anon;

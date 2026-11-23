@@ -428,6 +428,129 @@ def save_comment(author, body):
         return False
 
 
+REPORT_LABELS = [
+    "Freerider / doesn't contribute",
+    "Refuses to listen to suggestions",
+    "Lone wolf / doesn't communicate",
+    "Repeated conflicts with teammates",
+]
+
+
+def _reports_url():
+    base = st.secrets.get("SUPABASE_URL", "").strip().rstrip("/")
+    return f"{base}/rest/v1/reports" if base else ""
+
+
+def _praise_url():
+    base = st.secrets.get("SUPABASE_URL", "").strip().rstrip("/")
+    return f"{base}/rest/v1/praise" if base else ""
+
+
+def fetch_reports():
+    url = _reports_url()
+    if not url:
+        return []
+    try:
+        r = requests.get(f"{url}?select=*", headers=_supabase_headers(), timeout=15)
+        if r.status_code != 200:
+            return []
+        return [{"target_name": row.get("target_name"), "label": row.get("label"),
+                 "verdict": row.get("verdict")} for row in r.json()]
+    except Exception:
+        return []
+
+
+def fetch_praise():
+    url = _praise_url()
+    if not url:
+        return []
+    try:
+        r = requests.get(f"{url}?select=*", headers=_supabase_headers(), timeout=15)
+        if r.status_code != 200:
+            return []
+        return [row.get("target_name") for row in r.json()]
+    except Exception:
+        return []
+
+
+def save_report(target_name, label, evidence, verdict):
+    url = _reports_url()
+    if not url or not st.secrets.get("SUPABASE_ANON_KEY", ""):
+        return False
+    try:
+        r = requests.post(url, headers={**_supabase_headers(), "Prefer": "return=minimal"},
+                          json={"target_name": target_name, "label": label,
+                                "evidence": evidence, "verdict": verdict}, timeout=15)
+        return r.status_code in (200, 201, 204)
+    except Exception:
+        return False
+
+
+def save_praise(target_name):
+    url = _praise_url()
+    if not url or not st.secrets.get("SUPABASE_ANON_KEY", ""):
+        return False
+    try:
+        r = requests.post(url, headers={**_supabase_headers(), "Prefer": "return=minimal"},
+                          json={"target_name": target_name}, timeout=15)
+        return r.status_code in (200, 201, 204)
+    except Exception:
+        return False
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def flagged_people():
+    """{name: [labels]} for people with >=2 approved reports and <2 praise."""
+    from collections import Counter
+    rep_by_name = {}
+    for r in fetch_reports():
+        if r.get("verdict") != "approved":
+            continue
+        rep_by_name.setdefault(r["target_name"], []).append(r["label"])
+    praise_count = Counter(fetch_praise())
+    out = {}
+    for name, labels in rep_by_name.items():
+        if len(labels) >= 2 and praise_count.get(name, 0) < 2:
+            out[name] = list(dict.fromkeys(labels))
+    return out
+
+
+@st.cache_data(ttl=1800, show_spinner=False)
+def llm_report_review(target_name, label, evidence):
+    """Ask DeepSeek to approve/reject a report based on the evidence."""
+    try:
+        key = st.secrets["DEEPSEEK_API_KEY"]
+    except Exception:
+        return "approved"
+    if not key:
+        return "approved"
+    prompt = (
+        "You moderate reports in a student team-matching app.\n"
+        f"Reported teammate: {target_name}\nLabel (misconduct): {label}\n\n"
+        f"Evidence:\n{evidence[:3000]}\n\n"
+        "Does the evidence plausibly support the label? Answer exactly one word: APPROVE or REJECT."
+    )
+    try:
+        resp = requests.post(
+            "https://api.deepseek.com/chat/completions",
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            json={"model": st.secrets.get("DEEPSEEK_MODEL", "deepseek-chat"),
+                  "messages": [{"role": "user", "content": prompt}],
+                  "temperature": 0.0, "max_tokens": 8},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        text = resp.json()["choices"][0]["message"]["content"].strip().upper()
+        return "rejected" if "REJECT" in text else "approved"
+    except Exception:
+        return "approved"
+
+
+def flag_badges(name, flagged):
+    labels = flagged.get(name, [])
+    return "".join(f'<span class="sm-flag-tag">{l}</span>' for l in labels)
+
+
 @st.cache_data(ttl=600, show_spinner=False)
 def candidate_pool():
     """Mock library + all anonymized respondents, used for matching and browsing."""
@@ -929,6 +1052,7 @@ def team_coverage_html(cands):
 def render_results(shortlist, user, team_size, picked_set):
     """Render the n+3 shortlist as clickable cards; picked ones are highlighted."""
     need = team_size - 1
+    flagged = flagged_people()
     head = (f'<div class="sm-results-head">Team of {team_size} &middot; '
             f'{len(shortlist)} candidates shortlisted &middot; pick {need}</div>')
     cards = []
@@ -954,7 +1078,7 @@ def render_results(shortlist, user, team_size, picked_set):
             f'<details class="{card_cls}" style="animation-delay:{0.1 * (i - 1):.2f}s">'
             f'<summary class="sm-card-head">'
             f'<span class="sm-rank">#{i}</span>'
-            f'<span class="sm-name">{cand["name"]}</span>'
+            f'<span class="sm-name">{cand["name"]}</span>{flag_badges(cand["name"], flagged)}'
             f'<span class="sm-major">{cand["major"]}</span>'
             f'{badge}'
             f'<span class="sm-score">{total*100:.0f}%</span>'
@@ -989,12 +1113,13 @@ def render_library_cards(students):
         st.markdown('<div class="sm-note">No profiles match the current filters.</div>', unsafe_allow_html=True)
         return
     cards = []
+    flagged = flagged_people()
     for s in students:
         roles_txt = " &middot; ".join(s["roles"])
         cards.append(
             f'<details class="sm-card">'
             f'<summary class="sm-card-head">'
-            f'<span class="sm-name">{s["name"]}</span>'
+            f'<span class="sm-name">{s["name"]}</span>{flag_badges(s["name"], flagged)}'
             f'<span class="sm-major">{s["major"]}</span>'
             f'<span class="sm-lib-tag">{s["year"]}</span>'
             f'<span class="sm-lib-tag">{s["course"]}</span>'
@@ -1272,6 +1397,11 @@ details.sm-major[open] .sm-major-body { animation: majorReveal 0.34s cubic-bezie
 .sm-mtag.lo { border-color: var(--line); color: var(--faint); }
 .sm-mtag.tier { border-color: rgba(125,155,198,0.5); color: var(--blue); }
 @media (prefers-reduced-motion: reduce) { details.sm-major[open] .sm-major-body { animation: none !important; } }
+
+/* report / flag labels */
+.sm-flag-tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; letter-spacing: 0.04em; color: var(--red); border: 1px solid rgba(217,119,110,0.55); padding: 1px 7px; margin-left: 8px; vertical-align: middle; white-space: nowrap; }
+.sm-flag-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border: 1px solid var(--line); border-left: 2px solid var(--red); margin-bottom: 8px; }
+.sm-flag-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; color: var(--ink); }
 </style>
 
 <div class="sm-header">
@@ -1299,6 +1429,7 @@ with st.sidebar:
         ("Major Profiles", "profiles"),
         ("How It Works", "logic"),
         ("Feedback", "comments"),
+        ("Report", "report"),
     ]:
         if st.button(_label, use_container_width=True, key=f"nav_{_view}"):
             st.session_state.view = _view
@@ -1462,6 +1593,56 @@ elif st.session_state.view == "comments":
     else:
         for c in comments:
             st.markdown(f"**{c['author']}** · *{c['created_at'][:10]}*  \n{c['body']}", unsafe_allow_html=True)
+
+elif st.session_state.view == "report":
+    # --- report a teammate ---
+    st.markdown(section("00", "Report a Teammate"), unsafe_allow_html=True)
+    st.caption("Two approved reports mark a teammate; two later praises clear the mark. Evidence is reviewed by AI.")
+    r_target = st.text_input("Teammate's name (as shown in the app)", key="r_target")
+    r_label = st.selectbox("Label", REPORT_LABELS, key="r_label")
+    r_file = st.file_uploader("Evidence file (txt / md / csv / log / json)", type=["txt", "md", "csv", "log", "json"], key="r_file")
+    r_text = st.text_area("Or paste evidence (chat log / context)", key="r_text", height=120)
+    if st.button("Submit for AI review", type="primary", use_container_width=True):
+        evidence = ""
+        if r_file is not None:
+            try:
+                evidence += r_file.getvalue().decode("utf-8", errors="ignore")
+            except Exception:
+                pass
+        evidence = (evidence + "\n" + r_text).strip()
+        if not r_target.strip():
+            st.warning("Please enter the teammate's name.")
+        elif not evidence:
+            st.warning("Please attach evidence (a file or pasted text) for the AI to review.")
+        else:
+            verdict = llm_report_review(r_target.strip(), r_label, evidence)
+            if save_report(r_target.strip(), r_label, evidence[:3000], verdict):
+                flagged_people.clear()
+                st.success(f"Submitted — AI verdict: **{verdict.upper()}**.")
+            else:
+                st.warning("Couldn't reach the database (check Supabase setup).")
+
+    st.divider()
+    st.markdown("### Give praise")
+    p_target = st.text_input("Teammate's name", key="p_target")
+    if st.button("Submit praise", type="primary", use_container_width=True):
+        if not p_target.strip():
+            st.warning("Please enter a name.")
+        elif save_praise(p_target.strip()):
+            flagged_people.clear()
+            st.success("Praise recorded — thanks!")
+        else:
+            st.warning("Couldn't reach the database.")
+
+    st.divider()
+    st.markdown("### Currently flagged")
+    flagged = flagged_people()
+    if not flagged:
+        st.caption("No one is currently flagged.")
+    else:
+        for _name, _labels in flagged.items():
+            _tags = "".join(f'<span class="sm-flag-tag">{l}</span>' for l in _labels)
+            st.markdown(f'<div class="sm-flag-row"><span class="sm-flag-name">{_name}</span>{_tags}</div>', unsafe_allow_html=True)
 
 else:
     # --- questionnaire view ---
