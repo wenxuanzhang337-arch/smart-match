@@ -1545,12 +1545,12 @@ with st.sidebar:
     for _label, _view in [
         ("Home", "intro"),
         ("Questionnaire", "form"),
+        ("Team Analysis", "team"),
         ("Database", "library"),
         ("Major Profiles", "profiles"),
         ("How It Works", "logic"),
         ("Feedback", "comments"),
         ("Report", "report"),
-        ("Team Analysis", "team"),
     ]:
         if st.button(_label, use_container_width=True, key=f"nav_{_view}"):
             st.session_state.view = _view
