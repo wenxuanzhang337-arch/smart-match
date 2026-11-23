@@ -318,6 +318,7 @@ def build_sample_library(n=50, seed=7):
 
         students.append({
             "name": name, "email": email, "major": major,
+            "gender": rng.choice(["Male", "Female"]),
             "year": rng.choice(["Year 1", "Year 2", "Year 3", "Year 4"]),
             "course": course, "roles": roles,
             "hours": rng.choice(HOURS),
@@ -367,7 +368,7 @@ def fetch_respondents():
             return []
         return [{
             "name": row.get("name"), "email": row.get("email"),
-            "major": row.get("major"), "year": row.get("year"),
+            "major": row.get("major"), "year": row.get("year"), "gender": row.get("gender"),
             "course": row.get("course"), "roles": row.get("roles") or [],
             "hours": row.get("hours"), "meeting": row.get("meeting") or [],
             "load": row.get("load") or [], "grade": row.get("grade"),
@@ -579,7 +580,7 @@ def make_anonymized_profile(user, major):
         for axis, bonus in _ROLE_STAT_BONUS.get(r, {}).items():
             stats[axis] = min(95, stats[axis] + bonus)
     return {
-        "name": name, "email": email, "major": major, "year": user.get("year"),
+        "name": name, "email": email, "major": major, "gender": user.get("gender"), "year": user.get("year"),
         "course": user["course"], "roles": list(user["roles"]),
         "hours": user["hours"], "meeting": list(user["meeting"]), "load": list(user["load"]),
         "grade": user["grade"], "expect": user["expect"],
@@ -818,6 +819,43 @@ def greedy_team(pool, need):
         remaining.remove(best)
         for axis in RADAR_AXES:
             covered[axis] = max(covered[axis], best["stats"][axis])
+    return team
+
+
+def _gender_valid(genders):
+    from collections import Counter
+    c = Counter(g for g in genders if g in ("Male", "Female"))
+    return all(v != 1 for v in c.values())
+
+
+def fix_team_gender(team, ranked_pool, user_gender):
+    """Swap teammates so no gender ends up as the lone member (count == 1)."""
+    team = list(team)
+    if user_gender not in ("Male", "Female"):
+        return team
+    picked_names = {c["name"] for c in team}
+    for _ in range(len(team) + 3):
+        genders = [user_gender] + [c.get("gender") for c in team]
+        if _gender_valid(genders):
+            break
+        from collections import Counter
+        c = Counter(g for g in genders if g in ("Male", "Female"))
+        lone = next((g for g in ("Male", "Female") if c.get(g, 0) == 1), None)
+        if lone is None:
+            break
+        other = "Female" if lone == "Male" else "Male"
+        idx = next((i for i, x in enumerate(team) if x.get("gender") == lone), None)
+        target = other
+        if idx is None:
+            idx = next((i for i, x in enumerate(team) if x.get("gender") == other), None)
+            target = lone
+        if idx is None:
+            break
+        repl = next((x for x in ranked_pool if x["name"] not in picked_names and x.get("gender") == target), None)
+        if repl is None:
+            break
+        team[idx] = repl
+        picked_names = {c["name"] for c in team}
     return team
 
 
@@ -1474,7 +1512,7 @@ elif st.session_state.view == "results":
     shortlist = ranked[: team_size + EXTRA_CANDIDATES]
 
     # Greedy team assembly: teammates that together best cover the 7 skill areas.
-    greedy = greedy_team([cand for _, cand, _ in ranked], need)
+    greedy = fix_team_gender(greedy_team([cand for _, cand, _ in ranked], need), [cand for _, cand, _ in ranked], user.get("gender"))
     greedy_names = [c["name"] for c in greedy]
     have = {cand["name"] for _, cand, _ in shortlist}
     for g in greedy:
@@ -1494,6 +1532,8 @@ elif st.session_state.view == "results":
         short_names, default=default_team, key="picked",
     )
     picked_cands = [name_to_cand[n] for n in picked if n in name_to_cand]
+    if not _gender_valid([user.get("gender")] + [c.get("gender") for c in picked_cands]):
+        st.warning("This team leaves a lone male/female member — consider swapping to keep them from being isolated.")
 
     st.markdown(team_coverage_html(picked_cands), unsafe_allow_html=True)
     render_results(shortlist, user, team_size, set(picked))
@@ -1651,6 +1691,7 @@ else:
         st.session_state.just_started = False
     st.markdown(section("01", "About you"), unsafe_allow_html=True)
     year = st.selectbox("Year of study", ["Year 1", "Year 2", "Year 3", "Year 4"])
+    gender = st.selectbox("Gender", ["Male", "Female", "Prefer not to say"])
     major = st.selectbox("Major", _MAJORS)
     course = st.text_input("Which course are you looking for teammates for?", value="COMP1945")
     team_size = st.selectbox("How many people per team in this course?", TEAM_SIZES)
@@ -1708,7 +1749,7 @@ else:
                 "load": load, "grade": grade, "expect": expect,
                 "discussion": discussion, "decision": decision, "deadline": deadline,
                 "reliability": reliability,
-                "year": year, "major": major,
+                "year": year, "major": major, "gender": gender,
                 "weights": {
                     "Skills": w_skills, "Availability": w_avail, "Working style": w_style,
                     "Goals": w_goals, "Reliability": w_reliab,

@@ -6,6 +6,7 @@ create table if not exists public.respondents (
   email       text not null,
   major       text,
   year        text,
+  gender      text,
   course      text,
   roles       jsonb default '[]'::jsonb,
   hours       text,
@@ -32,6 +33,9 @@ create policy "anon_insert" on public.respondents
 
 -- Tables created via raw SQL need this grant for the anon role to reach them.
 grant select, insert on public.respondents to anon;
+
+-- For tables created before the gender field existed:
+alter table public.respondents add column if not exists gender text;
 
 -- Comments / feedback (for the sidebar "Feedback" section).
 create table if not exists public.comments (
