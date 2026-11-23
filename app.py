@@ -958,6 +958,49 @@ def major_profiles_html():
     return '<div class="sm-major-list">' + "".join(items) + '</div>'
 
 
+def ping_overlay(label):
+    """Brief full-screen geometric 'ping' feedback (crosshair + concentric squares)."""
+    return (
+        '<div class="sm-ping">'
+        '<div class="sm-ping-cross-h"></div><div class="sm-ping-cross-v"></div>'
+        '<div class="sm-ping-square s1"></div><div class="sm-ping-square s2"></div>'
+        f'<div class="sm-ping-text">{label}</div>'
+        '</div>'
+    )
+
+
+def _team_analysis_prompt(team):
+    lines = []
+    for c in team:
+        lines.append(
+            f"- {c['name']} ({c['major']}, {c.get('gender') or 'unknown'}): "
+            f"roles: {', '.join(c['roles']) if c.get('roles') else 'none'}; "
+            f"abilities Code={c['stats']['Code']}, Writing={c['stats']['Writing']}, Speaking={c['stats']['Speaking']}, "
+            f"Planning={c['stats']['Planning']}, Data={c['stats']['Data']}, Design={c['stats']['Design']}, Leadership={c['stats']['Leadership']}."
+        )
+    max_stats = {a: max(c["stats"][a] for c in team) for a in RADAR_AXES}
+    gaps = [a for a in RADAR_AXES if max_stats[a] < 60]
+    return (
+        PROJECT_CONTEXT + "\n\n"
+        "YOUR TASK: Analyze this formed team. Write plain text (no markdown headings), concise, covering: "
+        "1) overall assessment, 2) STRENGTHS (short '-' bullets), 3) WEAKNESSES / coverage gaps ('-' bullets), "
+        "4) concrete suggestions to amplify strengths and fix the gaps ('-' bullets).\n\n"
+        "TEAM:\n" + "\n".join(lines) +
+        f"\n\nCombined team max per axis: {max_stats}.\n"
+        f"Coverage gaps (no member strong in): {', '.join(gaps) or 'none'}."
+    )
+
+
+def team_analysis_html(text):
+    if not text:
+        return ('<div class="sm-analysis"><div class="sm-analysis-title">Team Analysis</div>'
+                '<p>Could not reach the AI service — try again later.</p></div>')
+    safe = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
+    return ('<div class="sm-analysis sm-team-analysis">'
+            '<div class="sm-analysis-title">Team Analysis <span class="sm-ai-tag">DeepSeek</span></div>'
+            f'<p>{safe}</p></div>')
+
+
 PROJECT_CONTEXT = (
     "PROJECT BACKGROUND: Smart Match is an AI-powered teammate-recommendation system for HKUST "
     "(Hong Kong University of Science and Technology) students forming groups for course projects. "
@@ -1440,6 +1483,25 @@ details.sm-major[open] .sm-major-body { animation: majorReveal 0.34s cubic-bezie
 .sm-flag-tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; letter-spacing: 0.04em; color: var(--red); border: 1px solid rgba(217,119,110,0.55); padding: 1px 7px; margin-left: 8px; vertical-align: middle; white-space: nowrap; }
 .sm-flag-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border: 1px solid var(--line); border-left: 2px solid var(--red); margin-bottom: 8px; }
 .sm-flag-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; color: var(--ink); }
+
+/* team analysis */
+.sm-team-reveal { animation: majorReveal 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+[data-testid="stSpinner"] { color: var(--blue); }
+[data-testid="stSpinner"] p, [data-testid="stSpinner"] div { font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.08em; font-size: 0.85rem; color: var(--blue); }
+
+/* geometric ping feedback */
+.sm-ping { position: fixed; inset: 0; z-index: 9999; pointer-events: none; display: flex; align-items: center; justify-content: center; animation: pingFade 0.7s ease-out forwards; }
+@keyframes pingFade { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+.sm-ping-cross-h { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--red); animation: pingH 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.sm-ping-cross-v { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: var(--red); animation: pingV 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes pingH { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+@keyframes pingV { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+.sm-ping-square { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); border: 1px solid var(--red); animation: pingSq 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.sm-ping-square.s1 { width: 200px; height: 200px; }
+.sm-ping-square.s2 { width: 90px; height: 90px; animation-delay: 0.06s; }
+@keyframes pingSq { from { transform: translate(-50%,-50%) scale(1.8); opacity: 0; } to { transform: translate(-50%,-50%) scale(1); opacity: 1; } }
+.sm-ping-text { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.2em; color: var(--red); animation: pingFade 0.7s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .sm-ping { display: none; } }
 </style>
 
 <div class="sm-header">
@@ -1468,6 +1530,7 @@ with st.sidebar:
         ("How It Works", "logic"),
         ("Feedback", "comments"),
         ("Report", "report"),
+        ("Team Analysis", "team"),
     ]:
         if st.button(_label, use_container_width=True, key=f"nav_{_view}"):
             st.session_state.view = _view
@@ -1683,6 +1746,46 @@ elif st.session_state.view == "report":
         for _name, _labels in flagged.items():
             _tags = "".join(f'<span class="sm-flag-tag">{l}</span>' for l in _labels)
             st.markdown(f'<div class="sm-flag-row"><span class="sm-flag-name">{_name}</span>{_tags}</div>', unsafe_allow_html=True)
+
+elif st.session_state.view == "team":
+    # --- team analysis ---
+    st.markdown(section("00", "Team Analysis"), unsafe_allow_html=True)
+    st.caption("Assemble a team from the database, then ask the AI for a full strengths/weaknesses analysis.")
+    pool = candidate_pool()
+    all_names = [s["name"] for s in pool]
+    team_pick = st.multiselect("Pick teammates from the database", all_names, key="team_pick")
+
+    if st.button("Start teaming", type="primary", use_container_width=True):
+        if not team_pick:
+            st.warning("Pick at least one teammate first.")
+        else:
+            st.session_state.team = [s for s in pool if s["name"] in team_pick]
+            st.session_state.team_formed = True
+            st.session_state.team_result = None
+            st.session_state.ping_label = "TEAM FORMED"
+            st.rerun()
+
+    if st.session_state.get("ping_label"):
+        st.markdown(ping_overlay(st.session_state.pop("ping_label")), unsafe_allow_html=True)
+
+    team = st.session_state.get("team") or []
+    if st.session_state.get("team_formed") and team:
+        st.markdown('<div class="sm-team-reveal">' + team_coverage_html(team) + '</div>', unsafe_allow_html=True)
+        if st.button("Start analysis", type="primary", use_container_width=True):
+            st.session_state.ping_label = "ANALYZING"
+            st.session_state.team_analyzing = True
+            st.rerun()
+
+    if st.session_state.get("team_analyzing"):
+        _team = st.session_state.get("team") or []
+        with st.spinner("ANALYZING TEAM — mapping coverage, strengths and gaps…"):
+            _res = llm_analysis(_team_analysis_prompt(_team))
+        st.session_state.team_result = _res
+        st.session_state.team_analyzing = False
+        st.rerun()
+
+    if st.session_state.get("team_result"):
+        st.markdown(team_analysis_html(st.session_state.team_result), unsafe_allow_html=True)
 
 else:
     # --- questionnaire view ---
