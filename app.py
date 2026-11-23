@@ -982,7 +982,7 @@ def _team_analysis_prompt(team):
     gaps = [a for a in RADAR_AXES if max_stats[a] < 60]
     return (
         PROJECT_CONTEXT + "\n\n"
-        "YOUR TASK: Analyze this formed team. Write plain text (no markdown headings), concise, covering: "
+        "YOUR TASK: Analyze this formed team. Write plain text (no markdown headings), about 300-500 words, covering: "
         "1) overall assessment, 2) STRENGTHS (short '-' bullets), 3) WEAKNESSES / coverage gaps ('-' bullets), "
         "4) concrete suggestions to amplify strengths and fix the gaps ('-' bullets).\n\n"
         "TEAM:\n" + "\n".join(lines) +
@@ -1058,7 +1058,6 @@ def llm_analysis(prompt):
                 "model": st.secrets.get("DEEPSEEK_MODEL", "deepseek-chat"),
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": 0.7,
-                "max_tokens": 300,
             },
             timeout=30,
         )
@@ -1486,8 +1485,29 @@ details.sm-major[open] .sm-major-body { animation: majorReveal 0.34s cubic-bezie
 
 /* team analysis */
 .sm-team-reveal { animation: majorReveal 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-[data-testid="stSpinner"] { color: var(--blue); }
-[data-testid="stSpinner"] p, [data-testid="stSpinner"] div { font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.08em; font-size: 0.85rem; color: var(--blue); }
+[data-testid="stSpinner"] {
+  position: fixed; inset: 0; z-index: 9998;
+  background-color: rgba(10,10,12,0.94);
+  background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+  display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 18px;
+  border: 1px solid var(--line);
+}
+[data-testid="stSpinner"]::before {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 150px; height: 150px; margin: -75px 0 0 -75px;
+  border: 1px solid var(--red);
+  animation: loadSpin 2.4s linear infinite;
+}
+[data-testid="stSpinner"]::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 72px; height: 72px; margin: -36px 0 0 -36px;
+  border: 1px solid var(--blue);
+  animation: loadSpinRev 3.2s linear infinite;
+}
+@keyframes loadSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes loadSpinRev { from { transform: rotate(45deg); } to { transform: rotate(405deg); } }
+[data-testid="stSpinner"] > div { font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.14em; font-size: 0.82rem; color: var(--blue); text-align: center; text-transform: uppercase; }
 
 /* geometric ping feedback */
 .sm-ping { position: fixed; inset: 0; z-index: 9999; pointer-events: none; display: flex; align-items: center; justify-content: center; animation: pingFade 0.7s ease-out forwards; }
@@ -1772,7 +1792,6 @@ elif st.session_state.view == "team":
     if st.session_state.get("team_formed") and team:
         st.markdown('<div class="sm-team-reveal">' + team_coverage_html(team) + '</div>', unsafe_allow_html=True)
         if st.button("Start analysis", type="primary", use_container_width=True):
-            st.session_state.ping_label = "ANALYZING"
             st.session_state.team_analyzing = True
             st.rerun()
 
