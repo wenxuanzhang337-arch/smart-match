@@ -289,24 +289,48 @@ MAJOR_RATIONALE = {
 }
 
 
+# Name pools for the 50 simulated respondents: 1/3 Mainland pinyin, 1/3 Cantonese, 1/3 foreign.
+_MAINLAND_SURNAMES = ["Zhang", "Wang", "Li", "Liu", "Chen", "Yang", "Huang", "Zhao", "Wu", "Zhou", "Xu", "Sun", "Ma", "Zhu", "Hu", "Guo", "He", "Gao", "Lin", "Luo"]
+_MAINLAND_GIVEN = ["Wei", "Fang", "Ming", "Yang", "Jie", "Lei", "Min", "Jun", "Hao", "Xin", "Yuxuan", "Haoran", "Zixuan", "Yifan", "Shanshan", "Xiaotong", "Yuchen", "Jingyi", "Ruoxi", "Minghao"]
+_CANTO_SURNAMES = ["Chan", "Wong", "Lee", "Ng", "Ho", "Lam", "Cheung", "Lau", "Tam", "Yip", "Leung", "Chow", "Fung", "Kwok", "Tang", "Tsang", "Mak", "Poon", "Siu", "To"]
+_CANTO_GIVEN = ["Tai Man", "Ka Yan", "Wai Ming", "Siu Ling", "Chun Kit", "Wing Shan", "Chi Ho", "Mei Ling", "Wing Cheung", "Ka Wai", "Sze Hang", "Hiu Tung", "Ching Yee", "Ho Yin", "Man Ho", "Yan Ting", "Ka Ho", "Wing Lam", "Chun Yin", "Tsz Ching"]
+_FOREIGN_FIRST = ["John", "Mary", "David", "Sarah", "Michael", "Emily", "James", "Emma", "Daniel", "Olivia", "Lucas", "Sophia", "Ethan", "Isabella", "Alexander", "Ava", "William", "Mia", "Ryan", "Chloe"]
+_FOREIGN_LAST = ["Smith", "Johnson", "Garcia", "Brown", "Williams", "Jones", "Miller", "Davis", "Rodriguez", "Wilson", "Anderson", "Taylor", "Thomas", "Moore", "Jackson", "Martin", "Perez", "Thompson", "White", "Harris"]
+
+
+def _random_name(rng, idx):
+    cat = idx % 3
+    if cat == 0:
+        return f"{rng.choice(_MAINLAND_SURNAMES)} {rng.choice(_MAINLAND_GIVEN)}"
+    if cat == 1:
+        return f"{rng.choice(_CANTO_SURNAMES)} {rng.choice(_CANTO_GIVEN)}"
+    return f"{rng.choice(_FOREIGN_FIRST)} {rng.choice(_FOREIGN_LAST)}"
+
+
 def build_sample_library(n=50, seed=7):
+    """50 simulated respondents who 'fill the questionnaire' — every answer is
+    random except the course (COMP1945); stats are derived from major + roles
+    via the same formula used for real respondents."""
     rng = random.Random(seed)
     students = []
     seen_names = set()
     seen_emails = set()
-    guard = 0
-    while len(students) < n and guard < 5000:
-        guard += 1
-        fn, ln = rng.choice(_FIRST), rng.choice(_LAST)
-        name = f"{fn} {ln}"
-        email = f"{fn.lower()}.{ln.lower()}@connect.ust.hk"
-        if name in seen_names or email in seen_emails:
-            continue
+    for i in range(n):
+        name = email = None
+        for _ in range(200):
+            cname = _random_name(rng, i)
+            cemail = cname.lower().replace(" ", ".") + "@connect.ust.hk"
+            if cname not in seen_names and cemail not in seen_emails:
+                name, email = cname, cemail
+                break
+        if name is None:
+            name, email = f"Student {i + 1}", f"student{i + 1}@connect.ust.hk"
         seen_names.add(name)
         seen_emails.add(email)
 
         roles = rng.sample(ALL_ROLES, rng.choice([1, 2, 2, 3]))
         major = rng.choice(_MAJORS)
+        weights = {k: rng.randint(0, 100) for k in ["Skills", "Availability", "Working style", "Goals", "Reliability"]}
         stats = _major_stats(major, rng)
         for r in roles:
             for axis, bonus in _ROLE_STAT_BONUS[r].items():
@@ -314,19 +338,19 @@ def build_sample_library(n=50, seed=7):
 
         busy = ["Internship", "Part-time job", "Job-hunting", "Graduate-school applications"]
         load = ["None of the above"] if rng.random() < 0.4 else rng.sample(busy, rng.randint(1, 2))
-        course = "COMP1945" if rng.random() < 0.62 else rng.choice(_OTHER_COURSES)
 
         students.append({
             "name": name, "email": email, "major": major,
             "gender": rng.choice(["Male", "Female"]),
             "year": rng.choice(["Year 1", "Year 2", "Year 3", "Year 4"]),
-            "course": course, "roles": roles,
+            "course": "COMP1945", "roles": roles,
             "hours": rng.choice(HOURS),
             "meeting": rng.sample(MEETING, rng.randint(1, 3)),
             "load": load,
             "grade": rng.choice(GRADES), "expect": rng.choice(EXPECT),
             "discussion": rng.choice(DISCUSSION), "decision": rng.choice(DECISION),
             "deadline": rng.choice(DEADLINE), "reliability": rng.choice(RELIABILITY),
+            "weights": weights,
             "stats": stats,
         })
     return students
