@@ -76,6 +76,79 @@ _T = {
     "opt_same": {"en": "Same major", "zh-CN": "同专业", "zh-TW": "同專業"},
     "opt_diff": {"en": "Different major (complementary)", "zh-CN": "不同专业（互补）", "zh-TW": "不同專業（互補）"},
     "opt_dm": {"en": "Doesn't matter", "zh-CN": "无所谓", "zh-TW": "無所謂"},
+    "opt_all": {"en": "All", "zh-CN": "全部", "zh-TW": "全部"},
+    "opt_any": {"en": "Any", "zh-CN": "任意", "zh-TW": "任意"},
+    # results
+    "back_form": {"en": "← Back to questionnaire", "zh-CN": "← 返回问卷", "zh-TW": "← 返回問卷"},
+    "added_as": {"en": "You were added to the matching pool anonymously as **{n}** ({e}).", "zh-CN": "你已匿名加入匹配池：**{n}**（{e}）。", "zh-TW": "你已匿名加入配對池：**{n}**（{e}）。"},
+    "results_caption": {"en": "Ranked by TOPSIS multi-criteria analysis · recommended team auto-selected by greedy skill-coverage.", "zh-CN": "由 TOPSIS 多准则分析排序 · 推荐队伍由贪心技能覆盖自动选出。", "zh-TW": "由 TOPSIS 多準則分析排序 · 推薦隊伍由貪心技能覆蓋自動選出。"},
+    "pick_team": {"en": "Assemble your team — pick {n} teammate(s) to update coverage", "zh-CN": "组建你的队伍——选 {n} 名队友以更新覆盖", "zh-TW": "組建你的隊伍——選 {n} 名隊友以更新覆蓋"},
+    "warn_gender": {"en": "This team leaves a lone male/female member — consider swapping to keep them from being isolated.", "zh-CN": "这个队伍有孤立的单一性别成员，建议换人以免被孤立。", "zh-TW": "這個隊伍有孤立的單一性別成員，建議換人以免被孤立。"},
+    "browse_library": {"en": "📚 Browse the Sample Library →", "zh-CN": "📚 浏览样本库 →", "zh-TW": "📚 瀏覽樣本庫 →"},
+    # library
+    "lib_head": {"en": "SAMPLE LIBRARY", "zh-CN": "样本库", "zh-TW": "樣本庫"},
+    "lib_count": {"en": "Browse and filter all candidate profiles.", "zh-CN": "浏览并筛选所有候选人资料。", "zh-TW": "瀏覽並篩選所有候選人資料。"},
+    "back_recs": {"en": "← Back to recommendations", "zh-CN": "← 返回推荐", "zh-TW": "← 返回推薦"},
+    "f_course": {"en": "Course", "zh-CN": "课程", "zh-TW": "課程"},
+    "f_year": {"en": "Year", "zh-CN": "年级", "zh-TW": "年級"},
+    "f_name": {"en": "Name", "zh-CN": "姓名", "zh-TW": "姓名"},
+    "f_roles": {"en": "Has role(s)", "zh-CN": "担任过角色", "zh-TW": "擔任過角色"},
+    "f_ability": {"en": "Ability dimension", "zh-CN": "能力维度", "zh-TW": "能力維度"},
+    "f_min": {"en": "Minimum {a}", "zh-CN": "最低 {a}", "zh-TW": "最低 {a}"},
+    "lib_match": {"en": "{n} / {m} profiles match", "zh-CN": "匹配 {n} / {m} 人", "zh-TW": "配對 {n} / {m} 人"},
+    # profiles
+    "sec_profiles": {"en": "Major Profiles", "zh-CN": "专业画像", "zh-TW": "專業畫像"},
+    "profiles_caption": {"en": "Click a major to reveal its 7-axis profile and why the values are set that way.", "zh-CN": "点击专业展开其七维画像，以及为何如此取值。", "zh-TW": "點擊專業展開其七維畫像，以及為何如此取值。"},
+    "lbl_strong": {"en": "Strong", "zh-CN": "强项", "zh-TW": "強項"},
+    "lbl_weaker": {"en": "Weaker", "zh-CN": "弱项", "zh-TW": "弱項"},
+    # comments / feedback
+    "sec_feedback": {"en": "Feedback", "zh-CN": "反馈", "zh-TW": "回饋"},
+    "comments_caption": {"en": "Comments and suggestions about the questionnaire or the site — stored anonymously.", "zh-CN": "对问卷或网站的意见与建议——匿名存储。", "zh-TW": "對問卷或網站的意見與建議——匿名存儲。"},
+    "c_name": {"en": "Your name (optional)", "zh-CN": "你的名字（可选）", "zh-TW": "你的名字（可選）"},
+    "c_body": {"en": "Comment / suggestion", "zh-CN": "评论 / 建议", "zh-TW": "評論 / 建議"},
+    "c_submit": {"en": "Submit comment", "zh-CN": "提交评论", "zh-TW": "提交評論"},
+    "c_warn_empty": {"en": "Please write a comment first.", "zh-CN": "请先写点内容。", "zh-TW": "請先寫點內容。"},
+    "c_success": {"en": "Thanks — your comment has been posted.", "zh-CN": "谢谢——你的评论已发布。", "zh-TW": "謝謝——你的評論已發布。"},
+    "c_none": {"en": "No comments yet — be the first.", "zh-CN": "还没有评论——来抢沙发。", "zh-TW": "還沒有評論——來搶頭香。"},
+    "err_db": {"en": "Couldn't reach the database (check Supabase setup).", "zh-CN": "无法连接数据库（请检查 Supabase 设置）。", "zh-TW": "無法連接資料庫（請檢查 Supabase 設置）。"},
+    "err_db_short": {"en": "Couldn't reach the database.", "zh-CN": "无法连接数据库。", "zh-TW": "無法連接資料庫。"},
+    # report
+    "sec_report": {"en": "Report a Teammate", "zh-CN": "举报队友", "zh-TW": "舉報隊友"},
+    "report_caption": {"en": "Two approved reports mark a teammate; two later praises clear the mark. Evidence is reviewed by AI.", "zh-CN": "两条通过 AI 审批的举报会标记一名队友；两条好评可清除标记。证据由 AI 审核。", "zh-TW": "兩條通過 AI 審批的舉報會標記一名隊友；兩條好評可清除標記。證據由 AI 審核。"},
+    "r_name": {"en": "Teammate's name (as shown in the app)", "zh-CN": "队友名字（与 App 中一致）", "zh-TW": "隊友名字（與 App 中一致）"},
+    "r_label": {"en": "Label", "zh-CN": "标签", "zh-TW": "標籤"},
+    "r_file": {"en": "Evidence file (txt / md / csv / log / json)", "zh-CN": "证据文件（txt / md / csv / log / json）", "zh-TW": "證據文件（txt / md / csv / log / json）"},
+    "r_text": {"en": "Or paste evidence (chat log / context)", "zh-CN": "或粘贴证据（聊天记录 / 上下文）", "zh-TW": "或粘貼證據（聊天記錄 / 上下文）"},
+    "r_submit": {"en": "Submit for AI review", "zh-CN": "提交给 AI 审批", "zh-TW": "提交給 AI 審批"},
+    "r_warn_name": {"en": "Please enter the teammate's name.", "zh-CN": "请输入队友名字。", "zh-TW": "請輸入隊友名字。"},
+    "r_warn_evidence": {"en": "Please attach evidence (a file or pasted text) for the AI to review.", "zh-CN": "请附上证据（文件或粘贴文本）供 AI 审核。", "zh-TW": "請附上證據（文件或粘貼文本）供 AI 審核。"},
+    "r_success": {"en": "Submitted — AI verdict: **{v}**.", "zh-CN": "已提交——AI 判定：**{v}**。", "zh-TW": "已提交——AI 判定：**{v}**。"},
+    "praise_head": {"en": "Give praise", "zh-CN": "给好评", "zh-TW": "給好評"},
+    "p_name": {"en": "Teammate's name", "zh-CN": "队友名字", "zh-TW": "隊友名字"},
+    "p_submit": {"en": "Submit praise", "zh-CN": "提交好评", "zh-TW": "提交好評"},
+    "p_warn_name": {"en": "Please enter a name.", "zh-CN": "请输入名字。", "zh-TW": "請輸入名字。"},
+    "p_success": {"en": "Praise recorded — thanks!", "zh-CN": "好评已记录——谢谢！", "zh-TW": "好評已記錄——謝謝！"},
+    "flagged_head": {"en": "Currently flagged", "zh-CN": "当前被标记的人", "zh-TW": "當前被標記的人"},
+    "flagged_none": {"en": "No one is currently flagged.", "zh-CN": "当前无人被标记。", "zh-TW": "當前無人被標記。"},
+    # team analysis
+    "sec_team": {"en": "Team Analysis", "zh-CN": "团队分析", "zh-TW": "團隊分析"},
+    "team_caption": {"en": "Assemble a team from the database, then ask the AI for a full strengths/weaknesses analysis.", "zh-CN": "从数据库组建团队，再让 AI 做全面的优缺点分析。", "zh-TW": "從資料庫組建團隊，再讓 AI 做全面的優缺點分析。"},
+    "team_pick": {"en": "Pick teammates from the database", "zh-CN": "从数据库挑选队友", "zh-TW": "從資料庫挑選隊友"},
+    "team_warn": {"en": "Pick at least one teammate first.", "zh-CN": "请先至少选一名队友。", "zh-TW": "請先至少選一名隊友。"},
+    "team_start": {"en": "Start teaming", "zh-CN": "开始组队", "zh-TW": "開始組隊"},
+    "team_analyze": {"en": "Start analysis", "zh-CN": "开始分析", "zh-TW": "開始分析"},
+    "team_spinner": {"en": "ANALYZING TEAM — mapping coverage, strengths and gaps…", "zh-CN": "分析团队中——梳理覆盖、优势与缺口…", "zh-TW": "分析團隊中——梳理覆蓋、優勢與缺口…"},
+    "ping_formed": {"en": "TEAM FORMED", "zh-CN": "组队完成", "zh-TW": "組隊完成"},
+    "ping_analyzing": {"en": "ANALYZING", "zh-CN": "分析中", "zh-TW": "分析中"},
+    # how it works section titles
+    "sec_logic": {"en": "How It Works", "zh-CN": "计算逻辑", "zh-TW": "計算邏輯"},
+    "sec_profile_7": {"en": "Candidate 7-axis skill profile", "zh-CN": "候选人七维技能画像", "zh-TW": "候選人七維技能畫像"},
+    "sec_ordinal": {"en": "Ordinal similarity", "zh-CN": "有序相似度", "zh-TW": "有序相似度"},
+    "sec_five": {"en": "Five matching dimensions", "zh-CN": "五个匹配维度", "zh-TW": "五個配對維度"},
+    "sec_weights": {"en": "Priority weights", "zh-CN": "优先级权重", "zh-TW": "優先級權重"},
+    "sec_topsis": {"en": "TOPSIS ranking", "zh-CN": "TOPSIS 排序", "zh-TW": "TOPSIS 排序"},
+    "sec_greedy": {"en": "Greedy team assembly", "zh-CN": "贪心组队", "zh-TW": "貪心組隊"},
+    "sec_refs": {"en": "References", "zh-CN": "参考文献", "zh-TW": "參考文獻"},
 }
 
 
@@ -1051,8 +1124,8 @@ def major_profiles_html():
             '<div class="sm-major-info">'
             f'<p class="sm-major-why">{why}</p>'
             f'<div class="sm-major-tags"><span class="sm-mtag-lbl">Level</span><span class="sm-mtag tier">{tier}</span></div>'
-            f'<div class="sm-major-tags"><span class="sm-mtag-lbl">Strong</span>{strong_html}</div>'
-            f'<div class="sm-major-tags"><span class="sm-mtag-lbl">Weaker</span>{weak_html}</div>'
+            f'<div class="sm-major-tags"><span class="sm-mtag-lbl">{t("lbl_strong")}</span>{strong_html}</div>'
+            f'<div class="sm-major-tags"><span class="sm-mtag-lbl">{t("lbl_weaker")}</span>{weak_html}</div>'
             '</div></div></div></details>'
         )
     return '<div class="sm-major-list">' + "".join(items) + '</div>'
@@ -1680,7 +1753,7 @@ elif st.session_state.view == "results":
         st.markdown(match_overlay(), unsafe_allow_html=True)
         st.session_state.just_matched = False
 
-    if st.button("← Back to questionnaire", key="back"):
+    if st.button(t("back_form"), key="back"):
         st.session_state.view = "form"
         st.rerun()
 
@@ -1709,54 +1782,54 @@ elif st.session_state.view == "results":
 
     if st.session_state.get("added_as"):
         anon_name, anon_email = st.session_state.added_as
-        st.info(f"You were added to the matching pool anonymously as **{anon_name}** ({anon_email}).")
-    st.caption("Ranked by TOPSIS multi-criteria analysis · recommended team auto-selected by greedy skill-coverage.")
+        st.info(t("added_as").format(n=anon_name, e=anon_email))
+    st.caption(t("results_caption"))
     picked = st.multiselect(
-        f"Assemble your team — pick {need} teammate(s) to update coverage",
+        t("pick_team").format(n=need),
         short_names, default=default_team, key="picked",
     )
     picked_cands = [name_to_cand[n] for n in picked if n in name_to_cand]
     if not _gender_valid([user.get("gender")] + [c.get("gender") for c in picked_cands]):
-        st.warning("This team leaves a lone male/female member — consider swapping to keep them from being isolated.")
+        st.warning(t("warn_gender"))
 
     st.markdown(team_coverage_html(picked_cands), unsafe_allow_html=True)
     render_results(shortlist, user, team_size, set(picked))
 
     st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
-    if st.button("📚 Browse the Sample Library →", type="primary", key="to_library"):
+    if st.button(t("browse_library"), type="primary", key="to_library"):
         st.session_state.view = "library"
         st.rerun()
 
 elif st.session_state.view == "library":
     # --- sample library view ---
-    st.markdown('<div class="sm-lib-head">SAMPLE <span class="accent">LIBRARY</span></div>'
-                '<div class="sm-lib-count">Browse and filter all candidate profiles.</div>',
+    st.markdown(f'<div class="sm-lib-head">{t("lib_head")}</div>'
+                f'<div class="sm-lib-count">{t("lib_count")}</div>',
                 unsafe_allow_html=True)
 
-    if st.button("← Back to recommendations", key="back_recs"):
+    if st.button(t("back_recs"), key="back_recs"):
         st.session_state.view = "results"
         st.rerun()
 
     pool = candidate_pool()
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        course_f = st.selectbox("Course", ["All"] + sorted({s["course"] for s in pool}))
+        course_f = st.selectbox(t("f_course"), [t("opt_all")] + sorted({s["course"] for s in pool}))
     with c2:
-        major_f = st.selectbox("Major", ["All"] + sorted({s["major"] for s in pool}))
+        major_f = st.selectbox(t("q_major"), [t("opt_all")] + sorted({s["major"] for s in pool}))
     with c3:
-        year_f = st.selectbox("Year", ["All", "Year 1", "Year 2", "Year 3", "Year 4"])
+        year_f = st.selectbox(t("f_year"), [t("opt_all"), "Year 1", "Year 2", "Year 3", "Year 4"])
     with c4:
-        name_q = st.text_input("Name")
+        name_q = st.text_input(t("f_name"))
 
     c5, c6 = st.columns(2)
     with c5:
-        role_f = st.multiselect("Has role(s)", ALL_ROLES)
+        role_f = st.multiselect(t("f_roles"), ALL_ROLES)
     with c6:
-        ability = st.selectbox("Ability dimension", ["Any"] + RADAR_AXES)
+        ability = st.selectbox(t("f_ability"), [t("opt_any")] + RADAR_AXES)
 
     min_score = 0
     if ability != "Any":
-        min_score = st.slider(f"Minimum {ability}", 0, 100, 50)
+        min_score = st.slider(t("f_min").format(a=ability), 0, 100, 50)
 
     students = pool
     if name_q:
@@ -1772,18 +1845,18 @@ elif st.session_state.view == "library":
     if ability != "Any":
         students = [s for s in students if s["stats"][ability] >= min_score]
 
-    st.caption(f"{len(students)} / {len(pool)} profiles match")
+    st.caption(t("lib_match").format(n=len(students), m=len(pool)))
     render_library_cards(students)
 
 elif st.session_state.view == "profiles":
     # --- major 7-axis profile summary ---
-    st.markdown(section("00", "Major Profiles"), unsafe_allow_html=True)
-    st.caption("Click a major to reveal its 7-axis profile and why the values are set that way.")
+    st.markdown(section("00", t("sec_profiles")), unsafe_allow_html=True)
+    st.caption(t("profiles_caption"))
     st.markdown(major_profiles_html(), unsafe_allow_html=True)
 
 elif st.session_state.view == "logic":
     # --- how the matching works ---
-    st.markdown(section("00", "How It Works"), unsafe_allow_html=True)
+    st.markdown(section("00", t("sec_logic")), unsafe_allow_html=True)
     st.markdown(
         "Matching runs in **two stages + one AI layer**:\n\n"
         "1. **TOPSIS ranking** — score every candidate on five weighted dimensions, then rank them.\n"
@@ -1792,7 +1865,7 @@ elif st.session_state.view == "logic":
         "Every formula and its source is below."
     )
 
-    st.markdown(section("01", "Candidate 7-axis skill profile"), unsafe_allow_html=True)
+    st.markdown(section("01", t("sec_profile_7")), unsafe_allow_html=True)
     st.markdown(
         "Each candidate's skill radar (Code, Writing, Speaking, Planning, Data, Design, Leadership) is built as:\n\n"
         "```\noffset        = round((admission_tier + entry_barrier) × 1.5)\n"
@@ -1804,7 +1877,7 @@ elif st.session_state.view == "logic":
         "prior*, not a learned model."
     )
 
-    st.markdown(section("02", "Ordinal similarity"), unsafe_allow_html=True)
+    st.markdown(section("02", t("sec_ordinal")), unsafe_allow_html=True)
     st.markdown(
         "For ordered multiple-choice answers (hours, grade, deadline, reliability), a linear distance similarity is used:\n\n"
         "```\nordinal(a, b) = 1                                  if a == b\n"
@@ -1812,7 +1885,7 @@ elif st.session_state.view == "logic":
         "Adjacent options score highest; the two extremes score 0. (Idea from rank correlation — see Spearman below.)"
     )
 
-    st.markdown(section("03", "Five matching dimensions"), unsafe_allow_html=True)
+    st.markdown(section("03", t("sec_five")), unsafe_allow_html=True)
     st.markdown(
         "Each candidate is scored 0–1 on five criteria (let *my* = you, *their* = candidate):\n\n"
         "**1. Skills (complementarity)** — do they cover roles/skills I lack, without duplicating me?\n"
@@ -1835,13 +1908,13 @@ elif st.session_state.view == "logic":
         "```\nReliability = ordinal(my_reliability, their_reliability)\n```"
     )
 
-    st.markdown(section("04", "Priority weights"), unsafe_allow_html=True)
+    st.markdown(section("04", t("sec_weights")), unsafe_allow_html=True)
     st.markdown(
         "Your five sliders (each 0–100) are normalized to sum to 1:\n\n"
         "```\nnormalized_w[k] = w[k] / (w[Skills] + w[Availability] + w[Working style] + w[Goals] + w[Reliability])\n```"
     )
 
-    st.markdown(section("05", "TOPSIS ranking"), unsafe_allow_html=True)
+    st.markdown(section("05", t("sec_topsis")), unsafe_allow_html=True)
     st.markdown(
         "TOPSIS (*Technique for Order of Preference by Similarity to Ideal Solution*) ranks candidates by closeness to an "
         "ideal best and distance from an anti-ideal worst:\n\n"
@@ -1854,7 +1927,7 @@ elif st.session_state.view == "logic":
         "Rank by `C_i` descending (0–1, higher = better)."
     )
 
-    st.markdown(section("06", "Greedy team assembly"), unsafe_allow_html=True)
+    st.markdown(section("06", t("sec_greedy")), unsafe_allow_html=True)
     st.markdown(
         "From the ranked pool, pick teammates that **maximize seven-axis coverage** (each axis takes the team maximum):\n\n"
         "```\ncoverage_gain(candidate) = Σ_axis max(0, candidate[axis] − covered[axis])\n"
@@ -1864,7 +1937,7 @@ elif st.session_state.view == "logic":
         "absent or has ≥ 2 people, preventing isolation."
     )
 
-    st.markdown(section("07", "References"), unsafe_allow_html=True)
+    st.markdown(section("07", t("sec_refs")), unsafe_allow_html=True)
     st.markdown(
         "- **TOPSIS** — Hwang & Yoon (1981), *Multiple Attribute Decision Making*. [DOI](https://doi.org/10.1007/978-3-642-48318-9)\n"
         "- **Team formation** — Lappas, Liu & Terzi (2009), *Finding a Team of Experts in Social Networks*, KDD. [DOI](https://dl.acm.org/doi/10.1145/1557019.1557074)\n"
@@ -1879,34 +1952,34 @@ elif st.session_state.view == "logic":
 
 elif st.session_state.view == "comments":
     # --- feedback / comments ---
-    st.markdown(section("00", "Feedback"), unsafe_allow_html=True)
-    st.caption("Comments and suggestions about the questionnaire or the site — stored anonymously.")
-    c_author = st.text_input("Your name (optional)", key="c_author")
-    c_body = st.text_area("Comment / suggestion", key="c_body")
-    if st.button("Submit comment", type="primary", use_container_width=True):
+    st.markdown(section("00", t("sec_feedback")), unsafe_allow_html=True)
+    st.caption(t("comments_caption"))
+    c_author = st.text_input(t("c_name"), key="c_author")
+    c_body = st.text_area(t("c_body"), key="c_body")
+    if st.button(t("c_submit"), type="primary", use_container_width=True):
         if not c_body.strip():
-            st.warning("Please write a comment first.")
+            st.warning(t("c_warn_empty"))
         elif save_comment((c_author or "Anonymous").strip(), c_body.strip()):
-            st.success("Thanks — your comment has been posted.")
+            st.success(t("c_success"))
         else:
-            st.warning("Couldn't reach the database (check Supabase setup).")
+            st.warning(t("err_db"))
     st.divider()
     comments = fetch_comments()
     if not comments:
-        st.caption("No comments yet — be the first.")
+        st.caption(t("c_none"))
     else:
         for c in comments:
             st.markdown(f"**{c['author']}** · *{c['created_at'][:10]}*  \n{c['body']}", unsafe_allow_html=True)
 
 elif st.session_state.view == "report":
     # --- report a teammate ---
-    st.markdown(section("00", "Report a Teammate"), unsafe_allow_html=True)
-    st.caption("Two approved reports mark a teammate; two later praises clear the mark. Evidence is reviewed by AI.")
-    r_target = st.text_input("Teammate's name (as shown in the app)", key="r_target")
-    r_label = st.selectbox("Label", REPORT_LABELS, key="r_label")
-    r_file = st.file_uploader("Evidence file (txt / md / csv / log / json)", type=["txt", "md", "csv", "log", "json"], key="r_file")
-    r_text = st.text_area("Or paste evidence (chat log / context)", key="r_text", height=120)
-    if st.button("Submit for AI review", type="primary", use_container_width=True):
+    st.markdown(section("00", t("sec_report")), unsafe_allow_html=True)
+    st.caption(t("report_caption"))
+    r_target = st.text_input(t("r_name"), key="r_target")
+    r_label = st.selectbox(t("r_label"), REPORT_LABELS, key="r_label")
+    r_file = st.file_uploader(t("r_file"), type=["txt", "md", "csv", "log", "json"], key="r_file")
+    r_text = st.text_area(t("r_text"), key="r_text", height=120)
+    if st.button(t("r_submit"), type="primary", use_container_width=True):
         evidence = ""
         if r_file is not None:
             try:
@@ -1915,34 +1988,34 @@ elif st.session_state.view == "report":
                 pass
         evidence = (evidence + "\n" + r_text).strip()
         if not r_target.strip():
-            st.warning("Please enter the teammate's name.")
+            st.warning(t("r_warn_name"))
         elif not evidence:
-            st.warning("Please attach evidence (a file or pasted text) for the AI to review.")
+            st.warning(t("r_warn_evidence"))
         else:
             verdict = llm_report_review(r_target.strip(), r_label, evidence)
             if save_report(r_target.strip(), r_label, evidence[:3000], verdict):
                 flagged_people.clear()
-                st.success(f"Submitted — AI verdict: **{verdict.upper()}**.")
+                st.success(t("r_success").format(v=verdict.upper()))
             else:
-                st.warning("Couldn't reach the database (check Supabase setup).")
+                st.warning(t("err_db"))
 
     st.divider()
-    st.markdown("### Give praise")
-    p_target = st.text_input("Teammate's name", key="p_target")
-    if st.button("Submit praise", type="primary", use_container_width=True):
+    st.markdown("### " + t("praise_head"))
+    p_target = st.text_input(t("p_name"), key="p_target")
+    if st.button(t("p_submit"), type="primary", use_container_width=True):
         if not p_target.strip():
-            st.warning("Please enter a name.")
+            st.warning(t("p_warn_name"))
         elif save_praise(p_target.strip()):
             flagged_people.clear()
-            st.success("Praise recorded — thanks!")
+            st.success(t("p_success"))
         else:
-            st.warning("Couldn't reach the database.")
+            st.warning(t("err_db_short"))
 
     st.divider()
-    st.markdown("### Currently flagged")
+    st.markdown("### " + t("flagged_head"))
     flagged = flagged_people()
     if not flagged:
-        st.caption("No one is currently flagged.")
+        st.caption(t("flagged_none"))
     else:
         for _name, _labels in flagged.items():
             _tags = "".join(f'<span class="sm-flag-tag">{l}</span>' for l in _labels)
@@ -1950,20 +2023,20 @@ elif st.session_state.view == "report":
 
 elif st.session_state.view == "team":
     # --- team analysis ---
-    st.markdown(section("00", "Team Analysis"), unsafe_allow_html=True)
-    st.caption("Assemble a team from the database, then ask the AI for a full strengths/weaknesses analysis.")
+    st.markdown(section("00", t("sec_team")), unsafe_allow_html=True)
+    st.caption(t("team_caption"))
     pool = candidate_pool()
     all_names = [s["name"] for s in pool]
-    team_pick = st.multiselect("Pick teammates from the database", all_names, key="team_pick")
+    team_pick = st.multiselect(t("team_pick"), all_names, key="team_pick")
 
-    if st.button("Start teaming", type="primary", use_container_width=True):
+    if st.button(t("team_start"), type="primary", use_container_width=True):
         if not team_pick:
-            st.warning("Pick at least one teammate first.")
+            st.warning(t("team_warn"))
         else:
             st.session_state.team = [s for s in pool if s["name"] in team_pick]
             st.session_state.team_formed = True
             st.session_state.team_result = None
-            st.session_state.ping_label = "TEAM FORMED"
+            st.session_state.ping_label = t("ping_formed")
             st.rerun()
 
     if st.session_state.get("ping_label"):
@@ -1972,13 +2045,13 @@ elif st.session_state.view == "team":
     team = st.session_state.get("team") or []
     if st.session_state.get("team_formed") and team:
         st.markdown('<div class="sm-team-reveal">' + team_coverage_html(team) + '</div>', unsafe_allow_html=True)
-        if st.button("Start analysis", type="primary", use_container_width=True):
+        if st.button(t("team_analyze"), type="primary", use_container_width=True):
             st.session_state.team_analyzing = True
             st.rerun()
 
     if st.session_state.get("team_analyzing"):
         _team = st.session_state.get("team") or []
-        with st.spinner("ANALYZING TEAM — mapping coverage, strengths and gaps…"):
+        with st.spinner(t("team_spinner")):
             _res = llm_analysis(_team_analysis_prompt(_team))
         st.session_state.team_result = _res
         st.session_state.team_analyzing = False
