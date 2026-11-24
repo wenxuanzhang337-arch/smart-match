@@ -11,6 +11,37 @@ import random
 import streamlit as st
 import requests
 
+# --- i18n: English / Simplified Chinese / Traditional Chinese ---
+LANG_OPTIONS = {"English": "en", "简体中文": "zh-CN", "繁體中文": "zh-TW"}
+
+_T = {
+    "nav_title": {"en": "Navigation", "zh-CN": "导航", "zh-TW": "導航"},
+    "nav_home": {"en": "Home", "zh-CN": "首页", "zh-TW": "首頁"},
+    "nav_questionnaire": {"en": "Questionnaire", "zh-CN": "问卷", "zh-TW": "問卷"},
+    "nav_team": {"en": "Team Analysis", "zh-CN": "团队分析", "zh-TW": "團隊分析"},
+    "nav_database": {"en": "Database", "zh-CN": "数据库", "zh-TW": "資料庫"},
+    "nav_profiles": {"en": "Major Profiles", "zh-CN": "专业画像", "zh-TW": "專業畫像"},
+    "nav_logic": {"en": "How It Works", "zh-CN": "计算逻辑", "zh-TW": "計算邏輯"},
+    "nav_feedback": {"en": "Feedback", "zh-CN": "反馈", "zh-TW": "回饋"},
+    "nav_report": {"en": "Report", "zh-CN": "举报", "zh-TW": "舉報"},
+    "hero_title": {"en": "FIND YOUR TEAM", "zh-CN": "找到你的团队", "zh-TW": "找到你的團隊"},
+    "hero_tagline": {"en": "One short questionnaire. Matches scored across seven dimensions.", "zh-CN": "一份简短问卷，七维评分为你匹配。", "zh-TW": "一份簡短問卷，七維評分為你配對。"},
+    "chip_topsis": {"en": "TOPSIS RANKING", "zh-CN": "TOPSIS 排序", "zh-TW": "TOPSIS 排序"},
+    "chip_greedy": {"en": "GREEDY TEAMING", "zh-CN": "贪心组队", "zh-TW": "貪心組隊"},
+    "chip_ai": {"en": "AI ANALYSIS", "zh-CN": "AI 分析", "zh-TW": "AI 分析"},
+    "header_sub": {"en": "AI teammate recommendation for HKUST group projects", "zh-CN": "为港科大课程项目提供 AI 组队推荐", "zh-TW": "為港科大課程項目提供 AI 組隊推薦"},
+    "start_matching": {"en": "START MATCHING", "zh-CN": "开始匹配", "zh-TW": "開始配對"},
+}
+
+
+def _lang():
+    return LANG_OPTIONS.get(st.session_state.get("lang", "English"), "en")
+
+
+def t(key):
+    entry = _T.get(key, {})
+    return entry.get(_lang(), entry.get("en", key))
+
 # ---------------------------------------------------------------------------
 # The matching rubric (grounded in team-effectiveness research):
 #   D1 Roles / skills  -> complementarity  (a team needs DIFFERENT skills)
@@ -696,12 +727,12 @@ def intro_hero():
     return (
         '<div class="sm-hero">'
         '<div class="sm-target"><div class="t1"></div><div class="t2"></div><div class="t3"></div></div>'
-        '<div class="sm-hero-title">FIND YOUR <span class="accent">TEAM</span></div>'
-        '<div class="sm-tagline">One short questionnaire. Matches scored across seven dimensions.</div>'
+        f'<div class="sm-hero-title">{t("hero_title")}</div>'
+        f'<div class="sm-tagline">{t("hero_tagline")}</div>'
         '<div class="sm-chips">'
-        '<span class="sm-chip">TOPSIS RANKING</span>'
-        '<span class="sm-chip">GREEDY TEAMING</span>'
-        '<span class="sm-chip">AI ANALYSIS</span>'
+        f'<span class="sm-chip">{t("chip_topsis")}</span>'
+        f'<span class="sm-chip">{t("chip_greedy")}</span>'
+        f'<span class="sm-chip">{t("chip_ai")}</span>'
         '</div>'
         '</div>'
     )
@@ -1553,7 +1584,7 @@ details.sm-major[open] .sm-major-body { animation: majorReveal 0.34s cubic-bezie
   <div class="sm-sub">AI teammate recommendation for HKUST group projects</div>
 </div>
 <div class="sm-rule"></div>
-''', unsafe_allow_html=True)
+'''.replace("AI teammate recommendation for HKUST group projects", t("header_sub")), unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
 # View routing
@@ -1564,17 +1595,18 @@ if "view" not in st.session_state:
 # --- collapsible left navigation ---
 with st.sidebar:
     st.markdown("### SMART MATCH")
-    st.caption("Navigation")
+    st.selectbox("🌐 Language", list(LANG_OPTIONS.keys()), key="lang")
+    st.caption(t("nav_title"))
     st.divider()
     for _label, _view in [
-        ("Home", "intro"),
-        ("Questionnaire", "form"),
-        ("Team Analysis", "team"),
-        ("Database", "library"),
-        ("Major Profiles", "profiles"),
-        ("How It Works", "logic"),
-        ("Feedback", "comments"),
-        ("Report", "report"),
+        (t("nav_home"), "intro"),
+        (t("nav_questionnaire"), "form"),
+        (t("nav_team"), "team"),
+        (t("nav_database"), "library"),
+        (t("nav_profiles"), "profiles"),
+        (t("nav_logic"), "logic"),
+        (t("nav_feedback"), "comments"),
+        (t("nav_report"), "report"),
     ]:
         if st.button(_label, use_container_width=True, key=f"nav_{_view}"):
             st.session_state.view = _view
@@ -1588,7 +1620,7 @@ if st.session_state.view == "intro":
     st.markdown(intro_hero(), unsafe_allow_html=True)
     _, mid, _ = st.columns([1, 1.4, 1])
     with mid:
-        if st.button("START MATCHING", type="primary", use_container_width=True, key="start"):
+        if st.button(t("start_matching"), type="primary", use_container_width=True, key="start"):
             st.session_state.view = "form"
             st.session_state.just_started = True
             st.rerun()
