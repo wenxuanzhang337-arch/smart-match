@@ -149,6 +149,19 @@ _T = {
     "sec_topsis": {"en": "TOPSIS ranking", "zh-CN": "TOPSIS 排序", "zh-TW": "TOPSIS 排序"},
     "sec_greedy": {"en": "Greedy team assembly", "zh-CN": "贪心组队", "zh-TW": "貪心組隊"},
     "sec_refs": {"en": "References", "zh-CN": "参考文献", "zh-TW": "參考文獻"},
+    "verdict_high": {"en": "Verdict: high match — contact first.", "zh-CN": "判定：高度匹配——建议优先联系。", "zh-TW": "判定：高度配對——建議優先聯繫。"},
+    "verdict_solid": {"en": "Verdict: solid match — keep on the shortlist.", "zh-CN": "判定：良好匹配——保留在候选名单。", "zh-TW": "判定：良好配對——保留在候選名單。"},
+    "verdict_moderate": {"en": "Verdict: moderate match — review before committing.", "zh-CN": "判定：中等匹配——确认前再斟酌。", "zh-TW": "判定：中等配對——確認前再斟酌。"},
+    "ai_analysis": {"en": "AI Analysis", "zh-CN": "AI 分析", "zh-TW": "AI 分析"},
+    "coverage_title": {"en": "Team Coverage", "zh-CN": "团队覆盖", "zh-TW": "團隊覆蓋"},
+    "coverage_empty": {"en": "Select at least one teammate above to see the combined skill coverage.", "zh-CN": "在上方至少选一名队友以查看团队技能覆盖。", "zh-TW": "在上方至少選一名隊友以查看團隊技能覆蓋。"},
+    "coverage_gap": {"en": "Coverage gap:", "zh-CN": "覆盖缺口：", "zh-TW": "覆蓋缺口："},
+    "coverage_gap_body": {"en": "no one on this team is strong in {axes}. Consider recruiting for it.", "zh-CN": "团队中无人擅长 {axes}。考虑招募这方面的人。", "zh-TW": "團隊中無人擅長 {axes}。考慮招募這方面的人。"},
+    "coverage_ok": {"en": "All seven dimensions are covered by someone strong.", "zh-CN": "七个维度都有强者覆盖。", "zh-TW": "七個維度都有強者覆蓋。"},
+    "overlay_found": {"en": "MATCH FOUND", "zh-CN": "匹配成功", "zh-TW": "配對成功"},
+    "overlay_found_sub": {"en": "Teammate view ready", "zh-CN": "队友视图已就绪", "zh-TW": "隊友視圖已就緒"},
+    "overlay_start": {"en": "MATCH START", "zh-CN": "匹配开始", "zh-TW": "配對開始"},
+    "overlay_start_sub": {"en": "Preparing your questionnaire", "zh-CN": "正在准备问卷", "zh-TW": "正在準備問卷"},
 }
 
 
@@ -159,6 +172,13 @@ def _lang():
 def t(key):
     entry = _T.get(key, {})
     return entry.get(_lang(), entry.get("en", key))
+
+
+_LANG_NAMES = {"en": "English", "zh-CN": "Simplified Chinese", "zh-TW": "Traditional Chinese"}
+
+
+def _lang_name():
+    return _LANG_NAMES.get(_lang(), "English")
 
 # ---------------------------------------------------------------------------
 # The matching rubric (grounded in team-effectiveness research):
@@ -816,8 +836,8 @@ def match_overlay():
     return (
         '<div class="sm-overlay"><div class="sm-frame">'
         '<span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>'
-        '<div class="sm-overlay-text">MATCH FOUND</div>'
-        '<div class="sm-overlay-sub">Teammate view ready</div>'
+        f'<div class="sm-overlay-text">{t("overlay_found")}</div>'
+        f'<div class="sm-overlay-sub">{t("overlay_found_sub")}</div>'
         '</div></div>'
     )
 
@@ -827,8 +847,8 @@ def launch_overlay():
     return (
         '<div class="sm-launch"><div class="sm-launch-center"><div class="sm-frame">'
         '<span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>'
-        '<div class="sm-launch-text">MATCH START</div>'
-        '<div class="sm-launch-sub">Preparing your questionnaire</div>'
+        f'<div class="sm-launch-text">{t("overlay_start")}</div>'
+        f'<div class="sm-launch-sub">{t("overlay_start_sub")}</div>'
         '</div></div></div>'
     )
 
@@ -1155,6 +1175,7 @@ def _team_analysis_prompt(team):
     gaps = [a for a in RADAR_AXES if max_stats[a] < 60]
     return (
         PROJECT_CONTEXT + "\n\n"
+        f"Respond in {_lang_name()}. "
         "YOUR TASK: Analyze this formed team. Write plain text (no markdown headings), about 300-500 words, covering: "
         "1) overall assessment, 2) STRENGTHS (short '-' bullets), 3) WEAKNESSES / coverage gaps ('-' bullets), "
         "4) concrete suggestions to amplify strengths and fix the gaps ('-' bullets).\n\n"
@@ -1196,6 +1217,7 @@ def _analysis_prompt(user, cand, total):
     w_str = ", ".join(f"{k}={round(100 * weights[k] / wsum)}%" for k in weights)
     return (
         PROJECT_CONTEXT + "\n\n"
+        f"Respond in {_lang_name()}. "
         "YOUR TASK: Write 3-4 sentences (plain text, no markdown, no headings) explaining why this specific "
         "candidate fits this student. Reference the five dimensions above where relevant. "
         "Cover: which skills the candidate adds that the student lacks, working-style compatibility, "
@@ -1243,11 +1265,11 @@ def llm_analysis(prompt):
 def analysis_html(user, cand, total):
     llm_text = llm_analysis(_analysis_prompt(user, cand, total))
     if total >= 0.7:
-        verdict = "Verdict: high match — contact first."
+        verdict = t("verdict_high")
     elif total >= 0.5:
-        verdict = "Verdict: solid match — keep on the shortlist."
+        verdict = t("verdict_solid")
     else:
-        verdict = "Verdict: moderate match — review before committing."
+        verdict = t("verdict_moderate")
 
     if llm_text:
         safe = llm_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
@@ -1270,15 +1292,15 @@ def analysis_html(user, cand, total):
         body = "".join(bullets)
         tag = ""
 
-    return ('<div class="sm-analysis"><div class="sm-analysis-title">AI Analysis' + tag + '</div>'
+    return ('<div class="sm-analysis"><div class="sm-analysis-title">' + t("ai_analysis") + tag + '</div>'
             + body + f'<p class="sm-verdict">{verdict}</p></div>')
 
 
 def team_coverage_html(cands):
     """Combined coverage radar + score + gap warnings for the selected team."""
     if not cands:
-        return ('<div class="sm-coverage"><div class="sm-coverage-title">Team Coverage</div>'
-                '<div class="sm-gap">Select at least one teammate above to see the combined skill coverage.</div></div>')
+        return ('<div class="sm-coverage"><div class="sm-coverage-title">' + t("coverage_title") + '</div>'
+                '<div class="sm-gap">' + t("coverage_empty") + '</div></div>')
     max_stats = {axis: max(c["stats"][axis] for c in cands) for axis in RADAR_AXES}
     coverage = round(sum(max_stats.values()) / len(RADAR_AXES))
     gaps = [a for a in RADAR_AXES if max_stats[a] < 60]
@@ -1288,13 +1310,12 @@ def team_coverage_html(cands):
         f'<span class="sm-bar-val">{max_stats[a]}</span></div>'
         for a in RADAR_AXES)
     if gaps:
-        gap_html = ('<div class="sm-gap"><b>Coverage gap:</b> no one on this team is strong in '
-                    + ", ".join(gaps) + '. Consider recruiting for it.</div>')
+        gap_html = ('<div class="sm-gap"><b>' + t("coverage_gap") + '</b> ' + t("coverage_gap_body").format(axes=", ".join(gaps)) + '</div>')
     else:
-        gap_html = '<div class="sm-gap ok">All seven dimensions are covered by someone strong.</div>'
+        gap_html = '<div class="sm-gap ok">' + t("coverage_ok") + '</div>'
     return (
         '<div class="sm-coverage">'
-        f'<div class="sm-coverage-title">Team Coverage <span class="sm-cover-score">{coverage} / 100</span></div>'
+        f'<div class="sm-coverage-title">' + t("coverage_title") + f' <span class="sm-cover-score">{coverage} / 100</span></div>'
         '<div class="sm-detail-grid">'
         f'<div class="sm-radar">{radar_svg(max_stats)}</div>'
         f'<div class="sm-detail-right">{bars}{gap_html}</div>'
