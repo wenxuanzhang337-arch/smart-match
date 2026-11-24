@@ -31,6 +31,51 @@ _T = {
     "chip_ai": {"en": "AI ANALYSIS", "zh-CN": "AI 分析", "zh-TW": "AI 分析"},
     "header_sub": {"en": "AI teammate recommendation for HKUST group projects", "zh-CN": "为港科大课程项目提供 AI 组队推荐", "zh-TW": "為港科大課程項目提供 AI 組隊推薦"},
     "start_matching": {"en": "START MATCHING", "zh-CN": "开始匹配", "zh-TW": "開始配對"},
+    # questionnaire
+    "sec_about": {"en": "About you", "zh-CN": "关于你", "zh-TW": "關於你"},
+    "sec_roles": {"en": "Roles and skills", "zh-CN": "角色与技能", "zh-TW": "角色與技能"},
+    "sec_avail": {"en": "Availability", "zh-CN": "时间安排", "zh-TW": "時間安排"},
+    "sec_goals": {"en": "Goals and expectations", "zh-CN": "目标与期望", "zh-TW": "目標與期望"},
+    "sec_style": {"en": "Working style", "zh-CN": "工作风格", "zh-TW": "工作風格"},
+    "sec_reliab": {"en": "Reliability", "zh-CN": "可靠性", "zh-TW": "可靠性"},
+    "sec_other": {"en": "Other", "zh-CN": "其他", "zh-TW": "其他"},
+    "sec_weights": {"en": "Priority weights", "zh-CN": "优先级权重", "zh-TW": "優先級權重"},
+    "q_year": {"en": "Year of study", "zh-CN": "年级", "zh-TW": "年級"},
+    "q_gender": {"en": "Gender", "zh-CN": "性别", "zh-TW": "性別"},
+    "q_major": {"en": "Major", "zh-CN": "专业", "zh-TW": "專業"},
+    "q_course": {"en": "Which course are you looking for teammates for?", "zh-CN": "你要为哪门课找队友？", "zh-TW": "你要為哪門課找隊友？"},
+    "q_team_size": {"en": "How many people per team in this course?", "zh-CN": "这门课每组多少人？", "zh-TW": "這門課每組多少人？"},
+    "q_roles": {"en": "Which roles have you actually taken in past projects?", "zh-CN": "你在过往项目里实际担任过哪些角色？", "zh-TW": "你在過往項目裡實際擔任過哪些角色？"},
+    "q_hours": {"en": "Hours per week you can commit", "zh-CN": "每周能投入多少小时", "zh-TW": "每週能投入多少小時"},
+    "q_meeting": {"en": "Preferred meeting times", "zh-CN": "偏好的会议时间", "zh-TW": "偏好的會議時間"},
+    "q_load": {"en": "What else occupies your time outside coursework?", "zh-CN": "课业之外还有什么占用你时间？", "zh-TW": "課業之外還有什麼佔用你時間？"},
+    "q_grade": {"en": "Your target grade", "zh-CN": "你的目标分数", "zh-TW": "你的目標分數"},
+    "q_expect": {"en": "What do you expect from teammates?", "zh-CN": "你对队友有什么期望？", "zh-TW": "你對隊友有什麼期望？"},
+    "q_discussion": {"en": "In discussion, you actually tended to...", "zh-CN": "在讨论中，你通常倾向于……", "zh-TW": "在討論中，你通常傾向於……"},
+    "q_decision": {"en": "When a decision was needed, you preferred...", "zh-CN": "需要做决定时，你更倾向于……", "zh-TW": "需要做決定時，你更傾向於……"},
+    "q_deadline": {"en": "How did you handle your last project's deadline?", "zh-CN": "上一个项目的截止日期你是怎么处理的？", "zh-TW": "上一個項目的截止日期你是怎麼處理的？"},
+    "q_reliability": {"en": "When your own parts were due, you usually delivered...", "zh-CN": "轮到你交付的部分，你通常……", "zh-TW": "輪到你交付的部分，你通常……"},
+    "q_pref_major": {"en": "Prefer teammates from", "zh-CN": "更希望队友来自", "zh-TW": "更希望隊友來自"},
+    "q_suggestion": {"en": "Any suggestions for the system? (optional)", "zh-CN": "对系统有什么建议？（可选）", "zh-TW": "對系統有什麼建議？（可選）"},
+    "q_weights_caption": {"en": "Five sliders, each **0–100** (aligned and identical). Their total must stay **≤ 100** — a live total is shown below.", "zh-CN": "五条滑杆，各 0–100（对齐一致），总和需 ≤ 100，下方实时显示总数。", "zh-TW": "五條滑桿，各 0–100（對齊一致），總和需 ≤ 100，下方實時顯示總數。"},
+    "w_skills": {"en": "Skills complementarity", "zh-CN": "技能互补", "zh-TW": "技能互補"},
+    "w_avail": {"en": "Availability alignment", "zh-CN": "时间契合度", "zh-TW": "時間契合度"},
+    "w_style": {"en": "Working-style compatibility", "zh-CN": "工作风格契合度", "zh-TW": "工作風格契合度"},
+    "w_goals": {"en": "Goals alignment", "zh-CN": "目标契合度", "zh-TW": "目標契合度"},
+    "w_reliab": {"en": "Reliability", "zh-CN": "可靠性", "zh-TW": "可靠性"},
+    "q_allocated": {"en": "Allocated **{n} / 100** — {m} point(s) free.", "zh-CN": "已分配 **{n} / 100**，还剩 {m} 分。", "zh-TW": "已分配 **{n} / 100**，還剩 {m} 分。"},
+    "q_over": {"en": "⚠️ **{n} / 100** — over by **{m}**, reduce before submitting.", "zh-CN": "⚠️ **{n} / 100**，超出 {m} 分，提交前请降低。", "zh-TW": "⚠️ **{n} / 100**，超出 {m} 分，提交前請降低。"},
+    "q_consent": {"en": "By submitting, you agree that your answers are stored anonymously (under a generated name) to improve matching.", "zh-CN": "提交即表示你同意：你的答案会匿名存储（使用生成的假名）以改进匹配。", "zh-TW": "提交即表示你同意：你的答案會匿名存儲（使用生成的假名）以改進配對。"},
+    "submit": {"en": "Find teammates", "zh-CN": "寻找队友", "zh-TW": "尋找隊友"},
+    "warn_roles": {"en": "Please pick at least one role and one meeting time.", "zh-CN": "请至少选一个角色和一个会议时间。", "zh-TW": "請至少選一個角色和一個會議時間。"},
+    "warn_zero": {"en": "Please allocate at least a few points across the five priority dimensions.", "zh-CN": "请至少给五个优先级维度分配一些分数。", "zh-TW": "請至少給五個優先級維度分配一些分數。"},
+    "err_over": {"en": "The five priorities total {n}, but they must not exceed 100. Reduce some sliders.", "zh-CN": "五个优先级总和为 {n}，不能超过 100，请降低一些滑杆。", "zh-TW": "五個優先級總和為 {n}，不能超過 100，請降低一些滑桿。"},
+    "opt_male": {"en": "Male", "zh-CN": "男", "zh-TW": "男"},
+    "opt_female": {"en": "Female", "zh-CN": "女", "zh-TW": "女"},
+    "opt_na": {"en": "Prefer not to say", "zh-CN": "不便透露", "zh-TW": "不便透露"},
+    "opt_same": {"en": "Same major", "zh-CN": "同专业", "zh-TW": "同專業"},
+    "opt_diff": {"en": "Different major (complementary)", "zh-CN": "不同专业（互补）", "zh-TW": "不同專業（互補）"},
+    "opt_dm": {"en": "Doesn't matter", "zh-CN": "无所谓", "zh-TW": "無所謂"},
 }
 
 
@@ -1947,60 +1992,60 @@ else:
     if st.session_state.get("just_started"):
         st.markdown(launch_overlay(), unsafe_allow_html=True)
         st.session_state.just_started = False
-    st.markdown(section("01", "About you"), unsafe_allow_html=True)
-    year = st.selectbox("Year of study", ["Year 1", "Year 2", "Year 3", "Year 4"])
-    gender = st.selectbox("Gender", ["Male", "Female", "Prefer not to say"])
-    major = st.selectbox("Major", _MAJORS)
-    course = st.text_input("Which course are you looking for teammates for?", value="COMP1945")
-    team_size = st.selectbox("How many people per team in this course?", TEAM_SIZES)
+    st.markdown(section("01", t("sec_about")), unsafe_allow_html=True)
+    year = st.selectbox(t("q_year"), ["Year 1", "Year 2", "Year 3", "Year 4"])
+    gender = st.selectbox(t("q_gender"), [t("opt_male"), t("opt_female"), t("opt_na")])
+    major = st.selectbox(t("q_major"), _MAJORS)
+    course = st.text_input(t("q_course"), value="COMP1945")
+    team_size = st.selectbox(t("q_team_size"), TEAM_SIZES)
 
-    st.markdown(section("02", "Roles and skills"), unsafe_allow_html=True)
-    roles = st.multiselect("Which roles have you actually taken in past projects?", ALL_ROLES)
+    st.markdown(section("02", t("sec_roles")), unsafe_allow_html=True)
+    roles = st.multiselect(t("q_roles"), ALL_ROLES)
 
-    st.markdown(section("03", "Availability"), unsafe_allow_html=True)
-    hours = st.radio("Hours per week you can commit", HOURS, horizontal=True)
-    meeting = st.multiselect("Preferred meeting times", MEETING)
-    load = st.multiselect("What else occupies your time outside coursework?", LOAD)
+    st.markdown(section("03", t("sec_avail")), unsafe_allow_html=True)
+    hours = st.radio(t("q_hours"), HOURS, horizontal=True)
+    meeting = st.multiselect(t("q_meeting"), MEETING)
+    load = st.multiselect(t("q_load"), LOAD)
 
-    st.markdown(section("04", "Goals and expectations"), unsafe_allow_html=True)
-    grade = st.radio("Your target grade", GRADES)
-    expect = st.radio("What do you expect from teammates?", EXPECT)
+    st.markdown(section("04", t("sec_goals")), unsafe_allow_html=True)
+    grade = st.radio(t("q_grade"), GRADES)
+    expect = st.radio(t("q_expect"), EXPECT)
 
-    st.markdown(section("05", "Working style"), unsafe_allow_html=True)
-    discussion = st.radio("In discussion, you actually tended to...", DISCUSSION)
-    decision = st.radio("When a decision was needed, you preferred...", DECISION)
-    deadline = st.radio("How did you handle your last project's deadline?", DEADLINE)
+    st.markdown(section("05", t("sec_style")), unsafe_allow_html=True)
+    discussion = st.radio(t("q_discussion"), DISCUSSION)
+    decision = st.radio(t("q_decision"), DECISION)
+    deadline = st.radio(t("q_deadline"), DEADLINE)
 
-    st.markdown(section("06", "Reliability"), unsafe_allow_html=True)
-    reliability = st.radio("When your own parts were due, you usually delivered...", RELIABILITY)
+    st.markdown(section("06", t("sec_reliab")), unsafe_allow_html=True)
+    reliability = st.radio(t("q_reliability"), RELIABILITY)
 
-    st.markdown(section("07", "Other"), unsafe_allow_html=True)
-    pref_major = st.radio("Prefer teammates from", ["Same major", "Different major (complementary)", "Doesn't matter"])
-    suggestion = st.text_area("Any suggestions for the system? (optional)")
+    st.markdown(section("07", t("sec_other")), unsafe_allow_html=True)
+    pref_major = st.radio(t("q_pref_major"), [t("opt_same"), t("opt_diff"), t("opt_dm")])
+    suggestion = st.text_area(t("q_suggestion"))
 
-    st.markdown(section("08", "Priority weights"), unsafe_allow_html=True)
-    st.caption("Five sliders, each **0–100** (aligned and identical). Their total must stay **≤ 100** — a live total is shown below.")
-    w_skills = st.slider("Skills complementarity", 0, 100, 0, key="uw_skills")
-    w_avail = st.slider("Availability alignment", 0, 100, 0, key="uw_avail")
-    w_style = st.slider("Working-style compatibility", 0, 100, 0, key="uw_style")
-    w_goals = st.slider("Goals alignment", 0, 100, 0, key="uw_goals")
-    w_reliab = st.slider("Reliability", 0, 100, 0, key="uw_reliab")
+    st.markdown(section("08", t("sec_weights")), unsafe_allow_html=True)
+    st.caption(t("q_weights_caption"))
+    w_skills = st.slider(t("w_skills"), 0, 100, 0, key="uw_skills")
+    w_avail = st.slider(t("w_avail"), 0, 100, 0, key="uw_avail")
+    w_style = st.slider(t("w_style"), 0, 100, 0, key="uw_style")
+    w_goals = st.slider(t("w_goals"), 0, 100, 0, key="uw_goals")
+    w_reliab = st.slider(t("w_reliab"), 0, 100, 0, key="uw_reliab")
     _wtotal = w_skills + w_avail + w_style + w_goals + w_reliab
     if _wtotal <= 100:
-        st.caption(f"Allocated **{_wtotal} / 100** — {100 - _wtotal} point(s) free.")
+        st.caption(t("q_allocated").format(n=_wtotal, m=100 - _wtotal))
     else:
-        st.caption(f"⚠️ **{_wtotal} / 100** — over by **{_wtotal - 100}**, reduce before submitting.")
+        st.caption(t("q_over").format(n=_wtotal, m=_wtotal - 100))
 
-    st.caption("By submitting, you agree that your answers are stored anonymously (under a generated name) to improve matching.")
-    submitted = st.button("Find teammates", type="primary", use_container_width=True)
+    st.caption(t("q_consent"))
+    submitted = st.button(t("submit"), type="primary", use_container_width=True)
 
     if submitted:
         if not roles or not meeting:
-            st.warning("Please pick at least one role and one meeting time.")
+            st.warning(t("warn_roles"))
         elif _wtotal == 0:
-            st.warning("Please allocate at least a few points across the five priority dimensions.")
+            st.warning(t("warn_zero"))
         elif _wtotal > 100:
-            st.error(f"The five priorities total {_wtotal}, but they must not exceed 100. Reduce some sliders.")
+            st.error(t("err_over").format(n=_wtotal))
         else:
             st.session_state.user = {
                 "course": course, "roles": roles, "hours": hours, "meeting": meeting,
