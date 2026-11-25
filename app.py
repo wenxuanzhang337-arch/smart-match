@@ -162,6 +162,41 @@ _T = {
     "overlay_found_sub": {"en": "Teammate view ready", "zh-CN": "队友视图已就绪", "zh-TW": "隊友視圖已就緒"},
     "overlay_start": {"en": "MATCH START", "zh-CN": "匹配开始", "zh-TW": "配對開始"},
     "overlay_start_sub": {"en": "Preparing your questionnaire", "zh-CN": "正在准备问卷", "zh-TW": "正在準備問卷"},
+    "logic_overview": {
+        "en": "Matching runs in **two stages + one AI layer**:\n\n1. **TOPSIS ranking** — score every candidate on five weighted dimensions, then rank them.\n2. **Greedy team assembly** — pick teammates that together maximize seven-axis skill coverage, then fix gender balance.\n3. **AI analysis** — explain each recommendation (and, in Team Analysis, the whole team).\n\nEvery formula and its source is below.",
+        "zh-CN": "匹配分为**两个阶段 + 一层 AI**：\n\n1. **TOPSIS 排序**——按五个加权维度给每位候选人打分，再排序。\n2. **贪心组队**——挑选能一起最大化七维技能覆盖的队友，再做性别平衡。\n3. **AI 分析**——解释每一条推荐（团队分析里则分析整支队伍）。\n\n下面给出所有公式及其出处。",
+        "zh-TW": "配對分為**兩個階段 + 一層 AI**：\n\n1. **TOPSIS 排序**——按五個加權維度給每位候選人打分，再排序。\n2. **貪心組隊**——挑選能一起最大化七維技能覆蓋的隊友，再做性別平衡。\n3. **AI 分析**——解釋每一條推薦（團隊分析裡則分析整支隊伍）。\n\n下面給出所有公式及其出處。",
+    },
+    "logic_profile": {
+        "en": "Each candidate's skill radar (Code, Writing, Speaking, Planning, Data, Design, Leadership) is built as:\n\n```\noffset        = round((admission_tier + entry_barrier) × 1.5)\nprofile[axis] = clamp( base_major[axis] + offset, 30, 95 )\nstats[axis]   = clamp( profile[axis] + jitter(±8), 30, 95 )\n             + 22 for each self-reported role that maps to that axis\n```\n\n`base_major` is a hand-tuned 0–100 prior per HKUST major (its typical learning content); `admission_tier` and `entry_barrier` are per-major offsets from JUPAS competitiveness and entry difficulty. This is a *domain-knowledge prior*, not a learned model.",
+        "zh-CN": "每位候选人的技能雷达（代码、写作、演讲、规划、数据、设计、领导力）这样构建：\n\n```\noffset        = round((admission_tier + entry_barrier) × 1.5)\nprofile[axis] = clamp( base_major[axis] + offset, 30, 95 )\nstats[axis]   = clamp( profile[axis] + jitter(±8), 30, 95 )\n             + 每个自报角色 +22（映射到对应轴）\n```\n\n`base_major` 是每个港科专业手工调校的 0–100 先验（其典型学习内容）；`admission_tier` 和 `entry_barrier` 是来自 JUPAS 竞争度与准入门槛的每专业偏移。这是*领域知识先验*，不是学出来的模型。",
+        "zh-TW": "每位候選人的技能雷達（代碼、寫作、演講、規劃、數據、設計、領導力）這樣構建：\n\n```\noffset        = round((admission_tier + entry_barrier) × 1.5)\nprofile[axis] = clamp( base_major[axis] + offset, 30, 95 )\nstats[axis]   = clamp( profile[axis] + jitter(±8), 30, 95 )\n             + 每個自報角色 +22（映射到對應軸）\n```\n\n`base_major` 是每個港科專業手工調校的 0–100 先驗（其典型學習內容）；`admission_tier` 和 `entry_barrier` 是來自 JUPAS 競爭度與准入門檻的每專業偏移。這是*領域知識先驗*，不是學出來的模型。",
+    },
+    "logic_ordinal": {
+        "en": "For ordered multiple-choice answers (hours, grade, deadline, reliability), a linear distance similarity is used:\n\n```\nordinal(a, b) = 1                                  if a == b\n               = max(0, 1 − |pos(a) − pos(b)| / (n − 1))  otherwise\n```\n\nAdjacent options score highest; the two extremes score 0. (Idea from rank correlation — see Spearman below.)",
+        "zh-CN": "对于有序的多选答案（时长、分数、截止、可靠性），使用线性距离相似度：\n\n```\nordinal(a, b) = 1                                  若 a == b\n               = max(0, 1 − |pos(a) − pos(b)| / (n − 1))  否则\n```\n\n相邻选项得分最高；两端得 0。（思路来自等级相关——见下方 Spearman。）",
+        "zh-TW": "對於有序的多選答案（時長、分數、截止、可靠性），使用線性距離相似度：\n\n```\nordinal(a, b) = 1                                  若 a == b\n               = max(0, 1 − |pos(a) − pos(b)| / (n − 1))  否則\n```\n\n相鄰選項得分最高；兩端得 0。（思路來自等級相關——見下方 Spearman。）",
+    },
+    "logic_five": {
+        "en": "Each candidate is scored 0–1 on five criteria (let *my* = you, *their* = candidate):\n\n**1. Skills (complementarity)** — do they cover roles/skills I lack, without duplicating me?\n```\nrole_score  = max(0, |their_roles − my_roles| / |their_roles|\n                     − 0.5 × |their_roles ∩ my_roles| / |their_roles|)\nskill_score = same formula over 'strong axes' (role axes + major axes ≥ 60)\nSkills      = 0.6 × role_score + 0.4 × skill_score\n```\n\n**2. Availability** — meeting overlap + weekly commitment.\n```\ntime_score   = |my_meeting ∩ their_meeting| / max(|my_meeting ∪ their_meeting|, 1)   (Jaccard)\nhours_score  = ordinal(my_hours, their_hours)\nload_penalty = 0.1 if they have internship / part-time / job-hunting\nAvailability = max(0, 0.6 × time_score + 0.4 × hours_score − load_penalty)\n```\n\n**3. Working style** — discussion, decision and deadline habits.\n```\nWorking style = ( [discussion match ? 1 : 0] + [decision match ? 1 : 0]\n                + ordinal(my_deadline, their_deadline) ) / 3\n```\n\n**4. Goals** — target grade and expectations.\n```\nGoals = 0.5 × ordinal(my_grade, their_grade)\n      + 0.5 × ( [expectations match ? 1 : 0.5] )\n```\n\n**5. Reliability** — delivery punctuality.\n```\nReliability = ordinal(my_reliability, their_reliability)\n```",
+        "zh-CN": "每位候选人在五个维度上打 0–1 分（*我的* = 你，*对方的* = 候选人）：\n\n**1. 技能（互补性）**——对方能否补上我缺的角色/技能，而不重复我？\n```\nrole_score  = max(0, |对方的角色 − 我的角色| / |对方的角色|\n                     − 0.5 × |对方的角色 ∩ 我的角色| / |对方的角色|)\nskill_score = 同样的公式，但作用于「强轴」（角色轴 + 专业轴 ≥ 60）\nSkills      = 0.6 × role_score + 0.4 × skill_score\n```\n\n**2. 时间安排**——会议重叠 + 每周投入。\n```\ntime_score   = |我的会议 ∩ 对方的会议| / max(|我的会议 ∪ 对方的会议|, 1)   (Jaccard)\nhours_score  = ordinal(我的时长, 对方的时长)\nload_penalty = 0.1（若对方有实习 / 兼职 / 求职）\nAvailability = max(0, 0.6 × time_score + 0.4 × hours_score − load_penalty)\n```\n\n**3. 工作风格**——讨论、决策与截止习惯。\n```\nWorking style = ( [讨论方式一致 ? 1 : 0] + [决策方式一致 ? 1 : 0]\n                + ordinal(我的截止, 对方的截止) ) / 3\n```\n\n**4. 目标**——目标分数与期望。\n```\nGoals = 0.5 × ordinal(我的分数, 对方的分数)\n      + 0.5 × ( [期望一致 ? 1 : 0.5] )\n```\n\n**5. 可靠性**——交付准时度。\n```\nReliability = ordinal(我的可靠性, 对方的可靠性)\n```",
+        "zh-TW": "每位候選人在五個維度上打 0–1 分（*我的* = 你，*對方的* = 候選人）：\n\n**1. 技能（互補性）**——對方能否補上我缺的角色/技能，而不重複我？\n```\nrole_score  = max(0, |對方的角色 − 我的角色| / |對方的角色|\n                     − 0.5 × |對方的角色 ∩ 我的角色| / |對方的角色|)\nskill_score = 同樣的公式，但作用於「強軸」（角色軸 + 專業軸 ≥ 60）\nSkills      = 0.6 × role_score + 0.4 × skill_score\n```\n\n**2. 時間安排**——會議重疊 + 每週投入。\n```\ntime_score   = |我的會議 ∩ 對方的會議| / max(|我的會議 ∪ 對方的會議|, 1)   (Jaccard)\nhours_score  = ordinal(我的時長, 對方的時長)\nload_penalty = 0.1（若對方有實習 / 兼職 / 求職）\nAvailability = max(0, 0.6 × time_score + 0.4 × hours_score − load_penalty)\n```\n\n**3. 工作風格**——討論、決策與截止習慣。\n```\nWorking style = ( [討論方式一致 ? 1 : 0] + [決策方式一致 ? 1 : 0]\n                + ordinal(我的截止, 對方的截止) ) / 3\n```\n\n**4. 目標**——目標分數與期望。\n```\nGoals = 0.5 × ordinal(我的分數, 對方的分數)\n      + 0.5 × ( [期望一致 ? 1 : 0.5] )\n```\n\n**5. 可靠性**——交付準時度。\n```\nReliability = ordinal(我的可靠性, 對方的可靠性)\n```",
+    },
+    "logic_weights": {
+        "en": "Your five sliders (each 0–100) are normalized to sum to 1:\n\n```\nnormalized_w[k] = w[k] / (w[Skills] + w[Availability] + w[Working style] + w[Goals] + w[Reliability])\n```",
+        "zh-CN": "你的五条滑杆（各 0–100）归一化到和为 1：\n\n```\nnormalized_w[k] = w[k] / (w[技能] + w[时间] + w[工作风格] + w[目标] + w[可靠性])\n```",
+        "zh-TW": "你的五條滑桿（各 0–100）歸一化到和為 1：\n\n```\nnormalized_w[k] = w[k] / (w[技能] + w[時間] + w[工作風格] + w[目標] + w[可靠性])\n```",
+    },
+    "logic_topsis": {
+        "en": "TOPSIS (*Technique for Order of Preference by Similarity to Ideal Solution*) ranks candidates by closeness to an ideal best and distance from an anti-ideal worst:\n\n```\n1. vector normalize:  n_j = sqrt( Σ_i r_ij² )            (r_ij = criterion j of candidate i)\n2. weight:            v_ij = (r_ij / n_j) × w_j\n3. ideal best/worst:  A+_j = max_i v_ij ;  A−_j = min_i v_ij\n4. distances:         S+_i = sqrt( Σ_j (v_ij − A+_j)² )\n                      S−_i = sqrt( Σ_j (v_ij − A−_j)² )\n5. closeness:         C_i = S−_i / (S+_i + S−_i)\n```\n\nRank by `C_i` descending (0–1, higher = better).",
+        "zh-CN": "TOPSIS（*逼近理想解排序法*）通过「离理想最优多近、离最差多远」来排序：\n\n```\n1. 向量归一化:  n_j = sqrt( Σ_i r_ij² )            (r_ij = 候选人 i 的维度 j)\n2. 加权:        v_ij = (r_ij / n_j) × w_j\n3. 理想解:      A+_j = max_i v_ij ;  A−_j = min_i v_ij\n4. 距离:        S+_i = sqrt( Σ_j (v_ij − A+_j)² )\n                S−_i = sqrt( Σ_j (v_ij − A−_j)² )\n5. 贴近度:      C_i = S−_i / (S+_i + S−_i)\n```\n\n按 `C_i` 降序排列（0–1，越大越好）。",
+        "zh-TW": "TOPSIS（*逼近理想解排序法*）透過「離理想最優多近、離最差多遠」來排序：\n\n```\n1. 向量歸一化:  n_j = sqrt( Σ_i r_ij² )            (r_ij = 候選人 i 的維度 j)\n2. 加權:        v_ij = (r_ij / n_j) × w_j\n3. 理想解:      A+_j = max_i v_ij ;  A−_j = min_i v_ij\n4. 距離:        S+_i = sqrt( Σ_j (v_ij − A+_j)² )\n                S−_i = sqrt( Σ_j (v_ij − A−_j)² )\n5. 貼近度:      C_i = S−_i / (S+_i + S−_i)\n```\n\n按 `C_i` 降序排列（0–1，越大越好）。",
+    },
+    "logic_greedy": {
+        "en": "From the ranked pool, pick teammates that **maximize seven-axis coverage** (each axis takes the team maximum):\n\n```\ncoverage_gain(candidate) = Σ_axis max(0, candidate[axis] − covered[axis])\nrepeat: add the candidate with the highest gain, then update covered[axis] = max(covered[axis], candidate[axis])\n```\n\nThis is the *maximum-coverage* problem (submodular); greedy guarantees a **1 − 1/e ≈ 63%** approximation.\n\nA final **gender-balance** pass swaps members so no gender is a lone member (count ≠ 1) — each gender is either absent or has ≥ 2 people, preventing isolation.",
+        "zh-CN": "从排序后的池子里挑队友，**最大化七维覆盖**（每个轴取团队最高）：\n\n```\ncoverage_gain(候选人) = Σ_轴 max(0, 候选人[轴] − 已覆盖[轴])\n循环：加入增益最高的候选人，再更新已覆盖[轴] = max(已覆盖[轴], 候选人[轴])\n```\n\n这是*最大覆盖*问题（子模）；贪心保证 **1 − 1/e ≈ 63%** 的近似最优。\n\n最后做一次**性别平衡**：交换成员，使任何性别都不是孤立成员（人数 ≠ 1）——每种性别要么没有、要么 ≥ 2 人，避免被孤立。",
+        "zh-TW": "從排序後的池子裡挑隊友，**最大化七維覆蓋**（每個軸取團隊最高）：\n\n```\ncoverage_gain(候選人) = Σ_軸 max(0, 候選人[軸] − 已覆蓋[軸])\n循環：加入增益最高的候選人，再更新已覆蓋[軸] = max(已覆蓋[軸], 候選人[軸])\n```\n\n這是*最大覆蓋*問題（子模）；貪心保證 **1 − 1/e ≈ 63%** 的近似最優。\n\n最後做一次**性別平衡**：交換成員，使任何性別都不是孤立成員（人數 ≠ 1）——每種性別要麼沒有、要麼 ≥ 2 人，避免被孤立。",
+    },
 }
 
 
@@ -417,45 +452,50 @@ def _major_stats(major, rng=None):
 
 # Why each major's 7-axis profile is distributed the way it is.
 MAJOR_RATIONALE = {
-    "Aerospace Engineering (AE)": "Aerodynamics, structures and flight mechanics favour maths, simulation and careful planning; less writing and speaking.",
-    "Biochemistry and Cell Biology (BCB)": "Lab-centred with heavy scientific writing and data interpretation; little coding or design.",
-    "Bioengineering (BIEN)": "Bridges engineering and life science — coding and data plus lab write-ups; lighter on speaking.",
-    "Biotechnology (BIOT)": "Research-oriented with report writing and data analysis; little programming or design.",
-    "Biotechnology and Business (BIBU)": "Pairs science with business, so writing, speaking and leadership stay balanced.",
-    "Chemical and Environmental Engineering (CEEV)": "Process and environmental design demand technical writing and planning; limited speaking.",
-    "Chemistry (CHEM)": "Lab-heavy with extensive report writing and data handling; minimal coding or design.",
-    "Civil and Environmental Engineering (CIVL)": "Structural design and site analysis need planning, writing and some design; modest speaking.",
-    "Computer Engineering (CPEG)": "Hardware plus software — strong coding and data; less writing and speaking.",
-    "Computer Science (COMP)": "Programming- and algorithm-heavy, so Code and Data dominate; little presentation or writing practice.",
-    "Data Science and Technology (DSCT)": "Math, statistics and machine learning make Data and Code the peaks; speaking and design stay low.",
-    "Decision Analytics (DA)": "Optimization and data-driven decisions — strong Data and Planning with balanced communication.",
-    "Economics (ECON)": "Theory, econometrics and essays — strong writing and data; little coding or design.",
-    "Economics and Finance (ECOF)": "Quantitative finance and essays — high data and writing; little design.",
-    "Electronic Engineering (ELEC)": "Circuits and systems favour coding and maths; less writing and speaking.",
-    "Environmental Management and Technology (EVMT)": "Policy plus environmental science — writing, planning and communication; less coding.",
-    "Finance (FINA)": "Valuation, markets and modelling — strong data plus presentation; little coding or design.",
-    "General Business Management (GBM)": "Broad management develops leadership, speaking and planning; minimal technical work.",
-    "Global Business (GBUS)": "International business and negotiation — top speaking and leadership; minimal coding.",
-    "Global China Studies (GCST)": "Humanities and social analysis — strongest writing and speaking; little maths or coding.",
-    "Individualized Interdisciplinary Major (IIM)": "Student-designed, so it defaults to a balanced profile across all axes.",
-    "Industrial Engineering and Engineering Management (IEEM)": "Process optimisation and operations — planning, data and leadership; moderate writing.",
-    "Information Systems (IS)": "Strong on coding and IT, but otherwise a fairly general business profile.",
-    "Integrative Systems and Design (ISD)": "Design thinking and prototyping — top design plus planning; lighter on coding.",
-    "Management (MGMT)": "People and organisations — leadership, speaking and planning; little technical work.",
-    "Marketing (MARK)": "Consumer insight and creative campaigns — speaking, design and writing; little coding.",
-    "Mathematics (MATH)": "Pure and applied maths — strong code and data; less writing and speaking.",
-    "Mathematics and Economics (MAEC)": "Quantitative economics — strong data and code; modest writing and speaking.",
-    "Mechanical Engineering (MECH)": "Mechanics, CAD and prototyping — design and planning plus decent coding and data.",
-    "Ocean Science and Technology (OCES)": "Field and lab science — data and writing; less speaking or design.",
-    "Operations Management (OM)": "Supply chains and processes — planning, data and leadership; less coding.",
-    "Physics (PHYS)": "Theory and experiment — strong code and data; less speaking or design.",
-    "Professional Accounting (PACC)": "Financial reporting and audit — planning, writing and data; little coding.",
-    "Quantitative Finance (QFIN)": "Math and finance modelling — top data plus coding; moderate speaking.",
-    "Quantitative Social Analysis (QSA)": "Social statistics — strong data and writing; moderate speaking; little design.",
-    "Risk Management and Business Intelligence (RMBI)": "Risk models and business intelligence — strong data, coding and planning; moderate leadership.",
-    "Sustainable and Green Finance (SGFN)": "Finance plus sustainability — data, writing and planning; little coding.",
-    "Sustainable Energy Engineering (SUSEE)": "Energy systems and policy — planning, writing and analysis; moderate coding.",
+    "Aerospace Engineering (AE)": {"en": "Aerodynamics, structures and flight mechanics favour maths, simulation and careful planning; less writing and speaking.", "zh-CN": "空气动力学、结构与飞行力学偏重数学、仿真与周密规划，写作和演讲较少。", "zh-TW": "空氣動力學、結構與飛行為學偏重數學、仿真與周密規劃，寫作和演講較少。"},
+    "Biochemistry and Cell Biology (BCB)": {"en": "Lab-centred with heavy scientific writing and data interpretation; little coding or design.", "zh-CN": "以实验室为中心，大量科学写作与数据解读，编程和设计较少。", "zh-TW": "以實驗室為中心，大量科學寫作與數據解讀，編程和設計較少。"},
+    "Bioengineering (BIEN)": {"en": "Bridges engineering and life science — coding and data plus lab write-ups; lighter on speaking.", "zh-CN": "横跨工程与生命科学——编程、数据加实验报告，演讲较少。", "zh-TW": "橫跨工程與生命科學——編程、數據加實驗報告，演講較少。"},
+    "Biotechnology (BIOT)": {"en": "Research-oriented with report writing and data analysis; little programming or design.", "zh-CN": "偏研究导向，重在报告写作与数据分析，编程和设计较少。", "zh-TW": "偏研究導向，重在報告寫作與數據分析，編程和設計較少。"},
+    "Biotechnology and Business (BIBU)": {"en": "Pairs science with business, so writing, speaking and leadership stay balanced.", "zh-CN": "科学结合商业，写作、演讲与领导力较为均衡。", "zh-TW": "科學結合商業，寫作、演講與領導力較為均衡。"},
+    "Chemical and Environmental Engineering (CEEV)": {"en": "Process and environmental design demand technical writing and planning; limited speaking.", "zh-CN": "工艺与环境设计需要技术写作和规划，演讲较少。", "zh-TW": "工藝與環境設計需要技術寫作和規劃，演講較少。"},
+    "Chemistry (CHEM)": {"en": "Lab-heavy with extensive report writing and data handling; minimal coding or design.", "zh-CN": "实验室任务繁重，大量报告写作与数据处理，编程和设计极少。", "zh-TW": "實驗室任務繁重，大量報告寫作與數據處理，編程和設計極少。"},
+    "Civil and Environmental Engineering (CIVL)": {"en": "Structural design and site analysis need planning, writing and some design; modest speaking.", "zh-CN": "结构设计与场地分析需要规划、写作和一定设计，演讲一般。", "zh-TW": "結構設計與場地分析需要規劃、寫作和一定設計，演講一般。"},
+    "Computer Engineering (CPEG)": {"en": "Hardware plus software — strong coding and data; less writing and speaking.", "zh-CN": "软硬兼备——编程和数据较强，写作和演讲较少。", "zh-TW": "軟硬兼備——編程和數據較強，寫作和演講較少。"},
+    "Computer Science (COMP)": {"en": "Programming- and algorithm-heavy, so Code and Data dominate; little presentation or writing practice.", "zh-CN": "以编程和算法为主，代码与数据占主导，演示和写作练习较少。", "zh-TW": "以編程和算法為主，代碼與數據佔主導，演示和寫作練習較少。"},
+    "Data Science and Technology (DSCT)": {"en": "Math, statistics and machine learning make Data and Code the peaks; speaking and design stay low.", "zh-CN": "数学、统计与机器学习让数据与代码成为强项，演讲和设计偏弱。", "zh-TW": "數學、統計與機器學習讓數據與代碼成為強項，演講和設計偏弱。"},
+    "Decision Analytics (DA)": {"en": "Optimization and data-driven decisions — strong Data and Planning with balanced communication.", "zh-CN": "优化与数据驱动决策——数据和规划较强，沟通均衡。", "zh-TW": "優化與數據驅動決策——數據和規劃較強，溝通均衡。"},
+    "Economics (ECON)": {"en": "Theory, econometrics and essays — strong writing and data; little coding or design.", "zh-CN": "理论、计量经济学与论文——写作和数据较强，编程和设计较少。", "zh-TW": "理論、計量經濟學與論文——寫作和數據較強，編程和設計較少。"},
+    "Economics and Finance (ECOF)": {"en": "Quantitative finance and essays — high data and writing; little design.", "zh-CN": "量化金融与论文——数据和写作较强，设计较少。", "zh-TW": "量化金融與論文——數據和寫作較強，設計較少。"},
+    "Electronic Engineering (ELEC)": {"en": "Circuits and systems favour coding and maths; less writing and speaking.", "zh-CN": "电路与系统偏重编程和数学，写作和演讲较少。", "zh-TW": "電路與系統偏重編程和數學，寫作和演講較少。"},
+    "Environmental Management and Technology (EVMT)": {"en": "Policy plus environmental science — writing, planning and communication; less coding.", "zh-CN": "政策加环境科学——写作、规划与沟通，编程较少。", "zh-TW": "政策加環境科學——寫作、規劃與溝通，編程較少。"},
+    "Finance (FINA)": {"en": "Valuation, markets and modelling — strong data plus presentation; little coding or design.", "zh-CN": "估值、市场与建模——数据和演示较强，编程和设计较少。", "zh-TW": "估值、市場與建模——數據和演示較強，編程和設計較少。"},
+    "General Business Management (GBM)": {"en": "Broad management develops leadership, speaking and planning; minimal technical work.", "zh-CN": "宽泛的管理培养领导力、演讲与规划，技术工作极少。", "zh-TW": "寬泛的管理培養領導力、演講與規劃，技術工作極少。"},
+    "Global Business (GBUS)": {"en": "International business and negotiation — top speaking and leadership; minimal coding.", "zh-CN": "国际商务与谈判——演讲和领导力突出，编程极少。", "zh-TW": "國際商務與談判——演講和領導力突出，編程極少。"},
+    "Global China Studies (GCST)": {"en": "Humanities and social analysis — strongest writing and speaking; little maths or coding.", "zh-CN": "人文与社会分析——写作和演讲最强，数学和编程较少。", "zh-TW": "人文與社會分析——寫作和演講最強，數學和編程較少。"},
+    "Individualized Interdisciplinary Major (IIM)": {"en": "Student-designed, so it defaults to a balanced profile across all axes.", "zh-CN": "由学生自设，因此七维默认均衡。", "zh-TW": "由學生自設，因此七維默認均衡。"},
+    "Industrial Engineering and Engineering Management (IEEM)": {"en": "Process optimisation and operations — planning, data and leadership; moderate writing.", "zh-CN": "流程优化与运营——规划、数据和领导力，写作一般。", "zh-TW": "流程優化與運營——規劃、數據和領導力，寫作一般。"},
+    "Information Systems (IS)": {"en": "Strong on coding and IT, but otherwise a fairly general business profile.", "zh-CN": "编程与 IT 较强，其余是较为宽泛的商业背景。", "zh-TW": "編程與 IT 較強，其餘是較為寬泛的商業背景。"},
+    "Integrative Systems and Design (ISD)": {"en": "Design thinking and prototyping — top design plus planning; lighter on coding.", "zh-CN": "设计思维与原型制作——设计突出、规划较强，编程较少。", "zh-TW": "設計思維與原型製作——設計突出、規劃較強，編程較少。"},
+    "Management (MGMT)": {"en": "People and organisations — leadership, speaking and planning; little technical work.", "zh-CN": "人与组织——领导力、演讲与规划，技术工作较少。", "zh-TW": "人與組織——領導力、演講與規劃，技術工作較少。"},
+    "Marketing (MARK)": {"en": "Consumer insight and creative campaigns — speaking, design and writing; little coding.", "zh-CN": "消费者洞察与创意营销——演讲、设计与写作，编程较少。", "zh-TW": "消費者洞察與創意營銷——演講、設計與寫作，編程較少。"},
+    "Mathematics (MATH)": {"en": "Pure and applied maths — strong code and data; less writing and speaking.", "zh-CN": "纯数学与应用数学——代码和数据较强，写作和演讲较少。", "zh-TW": "純數學與應用數學——代碼和數據較強，寫作和演講較少。"},
+    "Mathematics and Economics (MAEC)": {"en": "Quantitative economics — strong data and code; modest writing and speaking.", "zh-CN": "量化经济学——数据和代码较强，写作和演讲一般。", "zh-TW": "量化經濟學——數據和代碼較強，寫作和演講一般。"},
+    "Mechanical Engineering (MECH)": {"en": "Mechanics, CAD and prototyping — design and planning plus decent coding and data.", "zh-CN": "力学、CAD 与原型制作——设计和规划加不错的编程与数据。", "zh-TW": "力學、CAD 與原型製作——設計和規劃加不錯的編程與數據。"},
+    "Ocean Science and Technology (OCES)": {"en": "Field and lab science — data and writing; less speaking or design.", "zh-CN": "野外与实验室科学——数据和写作，演讲和设计较少。", "zh-TW": "野外與實驗室科學——數據和寫作，演講和設計較少。"},
+    "Operations Management (OM)": {"en": "Supply chains and processes — planning, data and leadership; less coding.", "zh-CN": "供应链与流程——规划、数据和领导力，编程较少。", "zh-TW": "供應鏈與流程——規劃、數據和領導力，編程較少。"},
+    "Physics (PHYS)": {"en": "Theory and experiment — strong code and data; less speaking or design.", "zh-CN": "理论与实验——代码和数据较强，演讲和设计较少。", "zh-TW": "理論與實驗——代碼和數據較強，演講和設計較少。"},
+    "Professional Accounting (PACC)": {"en": "Financial reporting and audit — planning, writing and data; little coding.", "zh-CN": "财务报告与审计——规划、写作和数据，编程较少。", "zh-TW": "財務報告與審計——規劃、寫作和數據，編程較少。"},
+    "Quantitative Finance (QFIN)": {"en": "Math and finance modelling — top data plus coding; moderate speaking.", "zh-CN": "数学与金融建模——数据顶尖、编程较强，演讲一般。", "zh-TW": "數學與金融建模——數據頂尖、編程較強，演講一般。"},
+    "Quantitative Social Analysis (QSA)": {"en": "Social statistics — strong data and writing; moderate speaking; little design.", "zh-CN": "社会统计——数据和写作较强，演讲一般，设计较少。", "zh-TW": "社會統計——數據和寫作較強，演講一般，設計較少。"},
+    "Risk Management and Business Intelligence (RMBI)": {"en": "Risk models and business intelligence — strong data, coding and planning; moderate leadership.", "zh-CN": "风险模型与商业智能——数据、编程和规划较强，领导力一般。", "zh-TW": "風險模型與商業智能——數據、編程和規劃較強，領導力一般。"},
+    "Sustainable and Green Finance (SGFN)": {"en": "Finance plus sustainability — data, writing and planning; little coding.", "zh-CN": "金融加可持续发展——数据、写作和规划，编程较少。", "zh-TW": "金融加可持續發展——數據、寫作和規劃，編程較少。"},
+    "Sustainable Energy Engineering (SUSEE)": {"en": "Energy systems and policy — planning, writing and analysis; moderate coding.", "zh-CN": "能源系统与政策——规划、写作与分析，编程一般。", "zh-TW": "能源系統與政策——規劃、寫作與分析，編程一般。"},
 }
+
+
+def _rationale(major):
+    entry = MAJOR_RATIONALE.get(major, {})
+    return entry.get(_lang(), entry.get("en", ""))
 
 
 # Name pools for the 50 simulated respondents: 1/3 Mainland pinyin, 1/3 Cantonese, 1/3 foreign.
@@ -1125,7 +1165,7 @@ def major_profiles_html():
     items = []
     for i, major in enumerate(MAJOR_PROFILES.keys(), 1):
         prof = major_profile(major)
-        why = MAJOR_RATIONALE.get(major, "")
+        why = _rationale(major)
         off = MAJOR_TIER.get(major, 0)
         tier = ("Elite" if off >= 10 else "High" if off >= 6 else "Solid" if off >= 1
                 else "Average" if off >= 0 else "Below avg")
@@ -1878,85 +1918,25 @@ elif st.session_state.view == "profiles":
 elif st.session_state.view == "logic":
     # --- how the matching works ---
     st.markdown(section("00", t("sec_logic")), unsafe_allow_html=True)
-    st.markdown(
-        "Matching runs in **two stages + one AI layer**:\n\n"
-        "1. **TOPSIS ranking** — score every candidate on five weighted dimensions, then rank them.\n"
-        "2. **Greedy team assembly** — pick teammates that together maximize seven-axis skill coverage, then fix gender balance.\n"
-        "3. **AI analysis** — explain each recommendation (and, in Team Analysis, the whole team).\n\n"
-        "Every formula and its source is below."
-    )
+    st.markdown(t("logic_overview"))
 
     st.markdown(section("01", t("sec_profile_7")), unsafe_allow_html=True)
-    st.markdown(
-        "Each candidate's skill radar (Code, Writing, Speaking, Planning, Data, Design, Leadership) is built as:\n\n"
-        "```\noffset        = round((admission_tier + entry_barrier) × 1.5)\n"
-        "profile[axis] = clamp( base_major[axis] + offset, 30, 95 )\n"
-        "stats[axis]   = clamp( profile[axis] + jitter(±8), 30, 95 )\n"
-        "             + 22 for each self-reported role that maps to that axis\n```\n\n"
-        "`base_major` is a hand-tuned 0–100 prior per HKUST major (its typical learning content); `admission_tier` and "
-        "`entry_barrier` are per-major offsets from JUPAS competitiveness and entry difficulty. This is a *domain-knowledge "
-        "prior*, not a learned model."
-    )
+    st.markdown(t("logic_profile"))
 
     st.markdown(section("02", t("sec_ordinal")), unsafe_allow_html=True)
-    st.markdown(
-        "For ordered multiple-choice answers (hours, grade, deadline, reliability), a linear distance similarity is used:\n\n"
-        "```\nordinal(a, b) = 1                                  if a == b\n"
-        "               = max(0, 1 − |pos(a) − pos(b)| / (n − 1))  otherwise\n```\n\n"
-        "Adjacent options score highest; the two extremes score 0. (Idea from rank correlation — see Spearman below.)"
-    )
+    st.markdown(t("logic_ordinal"))
 
     st.markdown(section("03", t("sec_five")), unsafe_allow_html=True)
-    st.markdown(
-        "Each candidate is scored 0–1 on five criteria (let *my* = you, *their* = candidate):\n\n"
-        "**1. Skills (complementarity)** — do they cover roles/skills I lack, without duplicating me?\n"
-        "```\nrole_score  = max(0, |their_roles − my_roles| / |their_roles|\n"
-        "                     − 0.5 × |their_roles ∩ my_roles| / |their_roles|)\n"
-        "skill_score = same formula over 'strong axes' (role axes + major axes ≥ 60)\n"
-        "Skills      = 0.6 × role_score + 0.4 × skill_score\n```\n\n"
-        "**2. Availability** — meeting overlap + weekly commitment.\n"
-        "```\ntime_score   = |my_meeting ∩ their_meeting| / max(|my_meeting ∪ their_meeting|, 1)   (Jaccard)\n"
-        "hours_score  = ordinal(my_hours, their_hours)\n"
-        "load_penalty = 0.1 if they have internship / part-time / job-hunting\n"
-        "Availability = max(0, 0.6 × time_score + 0.4 × hours_score − load_penalty)\n```\n\n"
-        "**3. Working style** — discussion, decision and deadline habits.\n"
-        "```\nWorking style = ( [discussion match ? 1 : 0] + [decision match ? 1 : 0]\n"
-        "                + ordinal(my_deadline, their_deadline) ) / 3\n```\n\n"
-        "**4. Goals** — target grade and expectations.\n"
-        "```\nGoals = 0.5 × ordinal(my_grade, their_grade)\n"
-        "      + 0.5 × ( [expectations match ? 1 : 0.5] )\n```\n\n"
-        "**5. Reliability** — delivery punctuality.\n"
-        "```\nReliability = ordinal(my_reliability, their_reliability)\n```"
-    )
+    st.markdown(t("logic_five"))
 
     st.markdown(section("04", t("sec_weights")), unsafe_allow_html=True)
-    st.markdown(
-        "Your five sliders (each 0–100) are normalized to sum to 1:\n\n"
-        "```\nnormalized_w[k] = w[k] / (w[Skills] + w[Availability] + w[Working style] + w[Goals] + w[Reliability])\n```"
-    )
+    st.markdown(t("logic_weights"))
 
     st.markdown(section("05", t("sec_topsis")), unsafe_allow_html=True)
-    st.markdown(
-        "TOPSIS (*Technique for Order of Preference by Similarity to Ideal Solution*) ranks candidates by closeness to an "
-        "ideal best and distance from an anti-ideal worst:\n\n"
-        "```\n1. vector normalize:  n_j = sqrt( Σ_i r_ij² )            (r_ij = criterion j of candidate i)\n"
-        "2. weight:            v_ij = (r_ij / n_j) × w_j\n"
-        "3. ideal best/worst:  A+_j = max_i v_ij ;  A−_j = min_i v_ij\n"
-        "4. distances:         S+_i = sqrt( Σ_j (v_ij − A+_j)² )\n"
-        "                      S−_i = sqrt( Σ_j (v_ij − A−_j)² )\n"
-        "5. closeness:         C_i = S−_i / (S+_i + S−_i)\n```\n\n"
-        "Rank by `C_i` descending (0–1, higher = better)."
-    )
+    st.markdown(t("logic_topsis"))
 
     st.markdown(section("06", t("sec_greedy")), unsafe_allow_html=True)
-    st.markdown(
-        "From the ranked pool, pick teammates that **maximize seven-axis coverage** (each axis takes the team maximum):\n\n"
-        "```\ncoverage_gain(candidate) = Σ_axis max(0, candidate[axis] − covered[axis])\n"
-        "repeat: add the candidate with the highest gain, then update covered[axis] = max(covered[axis], candidate[axis])\n```\n\n"
-        "This is the *maximum-coverage* problem (submodular); greedy guarantees a **1 − 1/e ≈ 63%** approximation.\n\n"
-        "A final **gender-balance** pass swaps members so no gender is a lone member (count ≠ 1) — each gender is either "
-        "absent or has ≥ 2 people, preventing isolation."
-    )
+    st.markdown(t("logic_greedy"))
 
     st.markdown(section("07", t("sec_refs")), unsafe_allow_html=True)
     st.markdown(
