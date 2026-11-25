@@ -200,6 +200,7 @@ _T = {
     "chat_title": {"en": "Ask the AI", "zh-CN": "问 AI", "zh-TW": "問 AI"},
     "chat_placeholder": {"en": "Ask a question or set a requirement…", "zh-CN": "提问或提出要求…", "zh-TW": "提問或提出要求…"},
     "chat_you": {"en": "You", "zh-CN": "你", "zh-TW": "你"},
+    "chat_loading": {"en": "Thinking…", "zh-CN": "思考中…", "zh-TW": "思考中…"},
 }
 
 
@@ -1832,6 +1833,13 @@ details.sm-major[open] .sm-major-body { animation: majorReveal 0.34s cubic-bezie
 @keyframes pingSq { from { transform: translate(-50%,-50%) scale(1.8); opacity: 0; } to { transform: translate(-50%,-50%) scale(1); opacity: 1; } }
 .sm-ping-text { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.2em; color: var(--red); animation: pingFade 0.7s ease-out both; }
 @media (prefers-reduced-motion: reduce) { .sm-ping { display: none; } }
+
+/* chatbot */
+.sm-chat-msg { padding: 10px 14px; margin: 7px 0; border: 1px solid var(--line); font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; line-height: 1.55; white-space: pre-wrap; }
+.sm-chat-msg.user { border-left: 2px solid var(--red); background: var(--surface); color: var(--ink); }
+.sm-chat-msg.ai { border-left: 2px solid var(--blue); background: var(--surface); color: var(--muted); }
+[data-testid="stExpander"] { border: 1px solid var(--line); border-left: 2px solid var(--red); background: var(--surface); }
+[data-testid="stExpander"] summary { font-family: 'Space Grotesk', sans-serif; font-weight: 600; letter-spacing: 0.04em; color: var(--ink); }
 </style>
 
 <div class="sm-header">
@@ -1937,30 +1945,35 @@ elif st.session_state.view == "results":
         st.session_state.view = "library"
         st.rerun()
 
-    # chat assistant
+    # chatbot (geometric expandable panel)
     st.divider()
-    st.markdown("### " + t("chat_title"))
     chat_history = st.session_state.setdefault("chat_history", [])
-    for role, text in chat_history:
-        if role == "user":
-            st.markdown(f"**{t('chat_you')}:** {text}")
-        else:
-            st.markdown(f'<div class="sm-analysis"><div class="sm-analysis-title">{t("ai_analysis")}</div><p>{text}</p></div>', unsafe_allow_html=True)
-    chat_msg = st.chat_input(t("chat_placeholder"))
-    if chat_msg:
-        chat_history.append(("user", chat_msg))
-        resp = llm_analysis(_chat_prompt(user, ranked, chat_msg))
-        parsed = _parse_chat_json(resp) if resp else None
-        if parsed:
-            w = {k: max(0.0, min(100.0, float(parsed["weights"].get(k, DEFAULT_WEIGHTS[k])))) for k in DEFAULT_WEIGHTS}
-            st.session_state.user["weights"] = w
-            ax = parsed.get("axes")
-            if isinstance(ax, dict):
-                st.session_state.user["axes"] = {k: max(0.0, min(2.0, float(ax.get(k, 1.0)))) for k in RADAR_AXES}
-            chat_history.append(("ai", parsed.get("advice") or "Team updated to match your requirement."))
-            st.rerun()
-        else:
-            chat_history.append(("ai", resp or "Sorry, I couldn't reach the AI service."))
+    with st.expander(t("chat_title"), expanded=False):
+        if not chat_history:
+            st.caption(t("chat_placeholder"))
+        for role, text in chat_history:
+            cls = "user" if role == "user" else "ai"
+            st.markdown(f'<div class="sm-chat-msg {cls}">{text}</div>', unsafe_allow_html=True)
+        c1, c2 = st.columns([7, 1])
+        with c1:
+            chat_msg = st.text_input("", key="chat_input", placeholder=t("chat_placeholder"), label_visibility="collapsed")
+        with c2:
+            send = st.button("➤", key="chat_send", use_container_width=True)
+        if send and chat_msg.strip():
+            chat_history.append(("user", chat_msg.strip()))
+            with st.spinner(t("chat_loading")):
+                resp = llm_analysis(_chat_prompt(user, ranked, chat_msg.strip()))
+            parsed = _parse_chat_json(resp) if resp else None
+            if parsed:
+                w = {k: max(0.0, min(100.0, float(parsed["weights"].get(k, DEFAULT_WEIGHTS[k])))) for k in DEFAULT_WEIGHTS}
+                st.session_state.user["weights"] = w
+                ax = parsed.get("axes")
+                if isinstance(ax, dict):
+                    st.session_state.user["axes"] = {k: max(0.0, min(2.0, float(ax.get(k, 1.0)))) for k in RADAR_AXES}
+                chat_history.append(("ai", parsed.get("advice") or "Team updated to match your requirement."))
+            else:
+                chat_history.append(("ai", resp or "Sorry, I couldn't reach the AI service."))
+            st.session_state.pop("chat_input", None)
             st.rerun()
 
 elif st.session_state.view == "library":
