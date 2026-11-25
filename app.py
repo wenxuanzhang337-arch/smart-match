@@ -1203,6 +1203,7 @@ def ping_overlay(label):
 
 
 def _team_analysis_prompt(team):
+    from collections import Counter
     lines = []
     for c in team:
         lines.append(
@@ -1213,15 +1214,47 @@ def _team_analysis_prompt(team):
         )
     max_stats = {a: max(c["stats"][a] for c in team) for a in RADAR_AXES}
     gaps = [a for a in RADAR_AXES if max_stats[a] < 60]
+
+    # gender composition + lone-gender warning
+    gcount = Counter(c.get("gender") for c in team)
+    males, females = gcount.get("Male", 0), gcount.get("Female", 0)
+    lone = [g for g in ("Male", "Female") if gcount.get(g, 0) == 1]
+    gender_note = f"males={males}, females={females}"
+    if lone:
+        gender_note += f" — WARNING: lone gender ({', '.join(lone)})"
+
+    # pairwise five-dimension mutual compatibility (members vs each other)
+    dim_keys = ["Skills", "Availability", "Working style", "Goals", "Reliability"]
+    pair_scores = []
+    for i in range(len(team)):
+        for j in range(i + 1, len(team)):
+            u, c = team[i], team[j]
+            d = {
+                "Skills": (score_roles(u, c) + score_roles(c, u)) / 2,
+                "Availability": score_availability(u, c),
+                "Working style": score_style(u, c),
+                "Goals": score_goals(u, c),
+                "Reliability": score_reliability(u, c),
+            }
+            pair_scores.append(d)
+    avg5 = {k: round(100 * sum(d[k] for d in pair_scores) / len(pair_scores)) for k in dim_keys} if pair_scores else {k: 0 for k in dim_keys}
+    weak5 = [k for k in dim_keys if avg5[k] < 50]
+
     return (
         PROJECT_CONTEXT + "\n\n"
         f"Respond in {_lang_name()}. "
         "YOUR TASK: Analyze this formed team. Write plain text (no markdown headings), about 300-500 words, covering: "
         "1) overall assessment, 2) STRENGTHS (short '-' bullets), 3) WEAKNESSES / coverage gaps ('-' bullets), "
-        "4) concrete suggestions to amplify strengths and fix the gaps ('-' bullets).\n\n"
+        "4) concrete suggestions to amplify strengths and fix the gaps ('-' bullets).\n"
+        "Also explicitly analyze (a) the GENDER BALANCE — flag any lone-gender member and suggest a fix; "
+        "and (b) whether members MUTUALLY MATCH each other on the five dimensions (skills, availability, working style, "
+        "goals, reliability) — not just their skill coverage.\n\n"
         "TEAM:\n" + "\n".join(lines) +
         f"\n\nCombined team max per axis: {max_stats}.\n"
-        f"Coverage gaps (no member strong in): {', '.join(gaps) or 'none'}."
+        f"Coverage gaps (no member strong in): {', '.join(gaps) or 'none'}.\n"
+        f"Gender composition: {gender_note}.\n"
+        f"Average pairwise five-dimension compatibility (0-100): {avg5}.\n"
+        f"Dimensions where members poorly match each other: {', '.join(weak5) or 'none'}."
     )
 
 
@@ -1261,11 +1294,12 @@ def _analysis_prompt(user, cand, total):
         "YOUR TASK: Write 3-4 sentences (plain text, no markdown, no headings) explaining why this specific "
         "candidate fits this student. Reference the five dimensions above where relevant. "
         "Cover: which skills the candidate adds that the student lacks, working-style compatibility, "
-        "availability overlap, goal alignment, and reliability. Be specific and factual. Do NOT write a verdict sentence.\n\n"
-        f"STUDENT — course: {user['course']}; roles: {', '.join(user['roles'])}; "
+        "availability overlap, goal alignment, and reliability. Be specific and factual. Do NOT write a verdict sentence. "
+        "Briefly note the candidate's gender only if relevant to the team fit.\n\n"
+        f"STUDENT — course: {user['course']}; gender: {user.get('gender') or 'unknown'}; roles: {', '.join(user['roles'])}; "
         f"discussion: {user['discussion']}; decision: {user['decision']}; deadline: {user['deadline']}; "
         f"reliability: {user['reliability']}; priority weights: {w_str}.\n"
-        f"CANDIDATE {cand['name']} ({cand['major']}, {cand['year']}) — roles: {', '.join(cand['roles'])}; "
+        f"CANDIDATE {cand['name']} ({cand['major']}, {cand.get('gender') or 'unknown'}, {cand['year']}) — roles: {', '.join(cand['roles'])}; "
         f"abilities 0-100: {abilities}; "
         f"discussion: {cand['discussion']}; decision: {cand['decision']}; deadline: {cand['deadline']}; "
         f"reliability: {cand['reliability']}; "
