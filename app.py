@@ -197,6 +197,9 @@ _T = {
         "zh-CN": "从排序后的池子里挑队友，**最大化七维覆盖**（每个轴取团队最高）：\n\n```\ncoverage_gain(候选人) = Σ_轴 max(0, 候选人[轴] − 已覆盖[轴])\n循环：加入增益最高的候选人，再更新已覆盖[轴] = max(已覆盖[轴], 候选人[轴])\n```\n\n这是*最大覆盖*问题（子模）；贪心保证 **1 − 1/e ≈ 63%** 的近似最优。\n\n最后做一次**性别平衡**：交换成员，使任何性别都不是孤立成员（人数 ≠ 1）——每种性别要么没有、要么 ≥ 2 人，避免被孤立。",
         "zh-TW": "從排序後的池子裡挑隊友，**最大化七維覆蓋**（每個軸取團隊最高）：\n\n```\ncoverage_gain(候選人) = Σ_軸 max(0, 候選人[軸] − 已覆蓋[軸])\n循環：加入增益最高的候選人，再更新已覆蓋[軸] = max(已覆蓋[軸], 候選人[軸])\n```\n\n這是*最大覆蓋*問題（子模）；貪心保證 **1 − 1/e ≈ 63%** 的近似最優。\n\n最後做一次**性別平衡**：交換成員，使任何性別都不是孤立成員（人數 ≠ 1）——每種性別要麼沒有、要麼 ≥ 2 人，避免被孤立。",
     },
+    "chat_title": {"en": "Ask the AI", "zh-CN": "问 AI", "zh-TW": "問 AI"},
+    "chat_placeholder": {"en": "Ask a question or set a requirement…", "zh-CN": "提问或提出要求…", "zh-TW": "提問或提出要求…"},
+    "chat_you": {"en": "You", "zh-CN": "你", "zh-TW": "你"},
 }
 
 
@@ -1034,16 +1037,17 @@ def topsis_closeness(rows, weights):
     return closeness
 
 
-def greedy_team(pool, need):
+def greedy_team(pool, need, axis_weights=None):
     """Greedy team assembly: repeatedly add the candidate that most increases the
     team's cumulative skill coverage across the 7 radar axes (submodular max-coverage)."""
+    w = axis_weights or {axis: 1.0 for axis in RADAR_AXES}
     team = []
     remaining = list(pool)
     covered = {axis: 0.0 for axis in RADAR_AXES}
     for _ in range(need):
         best, best_gain = None, 0.0
         for cand in remaining:
-            gain = sum(max(0.0, cand["stats"][axis] - covered[axis]) for axis in RADAR_AXES)
+            gain = sum(w[axis] * max(0.0, cand["stats"][axis] - covered[axis]) for axis in RADAR_AXES)
             if gain > best_gain:
                 best_gain, best = gain, cand
         if best is None:
@@ -1281,6 +1285,44 @@ PROJECT_CONTEXT = (
     "areas. Candidates outside the student's course are excluded, and the top candidates are recommended so the "
     "student can assemble a balanced team."
 )
+
+
+def _chat_prompt(user, ranked, message):
+    cand_lines = []
+    for total, cand, _b in ranked[:10]:
+        cand_lines.append(
+            f"- {cand['name']} ({cand['major']}, {cand.get('gender') or 'unknown'}): score={total*100:.0f}%; "
+            f"Code={cand['stats']['Code']}, Writing={cand['stats']['Writing']}, Speaking={cand['stats']['Speaking']}, "
+            f"Planning={cand['stats']['Planning']}, Data={cand['stats']['Data']}, Design={cand['stats']['Design']}, Leadership={cand['stats']['Leadership']}."
+        )
+    return (
+        PROJECT_CONTEXT + "\n\n"
+        f"Respond in {_lang_name()}. "
+        "The student just filled the questionnaire and is chatting on the results page.\n\n"
+        f"STUDENT: gender={user.get('gender') or 'unknown'}; roles={', '.join(user['roles'])}; "
+        f"priority weights={user.get('weights')}.\n\n"
+        "TOP CANDIDATES (ranked):\n" + "\n".join(cand_lines) + "\n\n"
+        f"USER MESSAGE: {message}\n\n"
+        "YOUR TASK:\n"
+        "1) If the message is a question or a worry (e.g. introverted, lazy, uncertain), reply with 2-4 sentences of practical advice. Output plain text only (no JSON).\n"
+        "2) If the message is a REQUIREMENT about what the team should optimize (e.g. coding is the top priority, availability matters most, reliability is everything), output a JSON object and nothing else, in EXACTLY this shape:\n"
+        '{"weights": {"Skills": 0, "Availability": 0, "Working style": 0, "Goals": 0, "Reliability": 0}, "axes": {"Code": 1.0, "Writing": 1.0, "Speaking": 1.0, "Planning": 1.0, "Data": 1.0, "Design": 1.0, "Leadership": 1.0}, "advice": "one short sentence"}\n'
+        "Weights must sum to 100. Axes are 0.0-2.0 (default 1.0; higher = prioritize that skill axis)."
+    )
+
+
+def _parse_chat_json(text):
+    import json, re
+    if not text:
+        return None
+    m = re.search(r"\{.*\}", text, re.DOTALL)
+    if not m:
+        return None
+    try:
+        obj = json.loads(m.group(0))
+        return obj if isinstance(obj.get("weights"), dict) else None
+    except Exception:
+        return None
 
 
 def _analysis_prompt(user, cand, total):
@@ -1864,7 +1906,7 @@ elif st.session_state.view == "results":
     shortlist = ranked[: team_size + EXTRA_CANDIDATES]
 
     # Greedy team assembly: teammates that together best cover the 7 skill areas.
-    greedy = fix_team_gender(greedy_team([cand for _, cand, _ in ranked], need), [cand for _, cand, _ in ranked], user.get("gender"))
+    greedy = fix_team_gender(greedy_team([cand for _, cand, _ in ranked], need, user.get("axes")), [cand for _, cand, _ in ranked], user.get("gender"))
     greedy_names = [c["name"] for c in greedy]
     have = {cand["name"] for _, cand, _ in shortlist}
     for g in greedy:
@@ -1894,6 +1936,32 @@ elif st.session_state.view == "results":
     if st.button(t("browse_library"), type="primary", key="to_library"):
         st.session_state.view = "library"
         st.rerun()
+
+    # chat assistant
+    st.divider()
+    st.markdown("### " + t("chat_title"))
+    chat_history = st.session_state.setdefault("chat_history", [])
+    for role, text in chat_history:
+        if role == "user":
+            st.markdown(f"**{t('chat_you')}:** {text}")
+        else:
+            st.markdown(f'<div class="sm-analysis"><div class="sm-analysis-title">{t("ai_analysis")}</div><p>{text}</p></div>', unsafe_allow_html=True)
+    chat_msg = st.chat_input(t("chat_placeholder"))
+    if chat_msg:
+        chat_history.append(("user", chat_msg))
+        resp = llm_analysis(_chat_prompt(user, ranked, chat_msg))
+        parsed = _parse_chat_json(resp) if resp else None
+        if parsed:
+            w = {k: max(0.0, min(100.0, float(parsed["weights"].get(k, DEFAULT_WEIGHTS[k])))) for k in DEFAULT_WEIGHTS}
+            st.session_state.user["weights"] = w
+            ax = parsed.get("axes")
+            if isinstance(ax, dict):
+                st.session_state.user["axes"] = {k: max(0.0, min(2.0, float(ax.get(k, 1.0)))) for k in RADAR_AXES}
+            chat_history.append(("ai", parsed.get("advice") or "Team updated to match your requirement."))
+            st.rerun()
+        else:
+            chat_history.append(("ai", resp or "Sorry, I couldn't reach the AI service."))
+            st.rerun()
 
 elif st.session_state.view == "library":
     # --- sample library view ---
