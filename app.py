@@ -201,6 +201,7 @@ _T = {
     "chat_placeholder": {"en": "Ask a question or set a requirement…", "zh-CN": "提问或提出要求…", "zh-TW": "提問或提出要求…"},
     "chat_you": {"en": "You", "zh-CN": "你", "zh-TW": "你"},
     "chat_loading": {"en": "Thinking…", "zh-CN": "思考中…", "zh-TW": "思考中…"},
+    "sec_self": {"en": "Your Profile", "zh-CN": "你的画像", "zh-TW": "你的畫像"},
 }
 
 
@@ -1326,6 +1327,20 @@ def _parse_chat_json(text):
         return None
 
 
+def _self_analysis_prompt(user, stats):
+    abilities = ", ".join(f"{a}={stats[a]}" for a in RADAR_AXES)
+    return (
+        PROJECT_CONTEXT + "\n\n"
+        f"Respond in {_lang_name()}. "
+        "The student just filled the questionnaire. Analyze THE STUDENT's own profile and what teammates they need.\n\n"
+        f"STUDENT: major={user.get('major')}; gender={user.get('gender') or 'unknown'}; roles={', '.join(user['roles'])}; "
+        f"abilities 0-100: {abilities}; priority weights={user.get('weights')}.\n\n"
+        "YOUR TASK: Write 3-5 sentences (plain text, no markdown headings) covering: "
+        "1) what this student is strong at, 2) what they lack, 3) what kind of teammate would complement them best. "
+        "Be specific, constructive and encouraging."
+    )
+
+
 def _analysis_prompt(user, cand, total):
     abilities = ", ".join(f"{a}={cand['stats'][a]}" for a in RADAR_AXES)
     weights = user.get("weights") or DEFAULT_WEIGHTS
@@ -1888,6 +1903,29 @@ if st.session_state.view == "intro":
             st.session_state.just_started = True
             st.rerun()
 
+elif st.session_state.view == "profile":
+    # --- self profile + AI self-analysis ---
+    st.markdown(section("00", t("sec_self")), unsafe_allow_html=True)
+    user = st.session_state.user
+    stats = user.get("stats") or {a: 50 for a in RADAR_AXES}
+    if not st.session_state.get("self_analysis"):
+        with st.spinner(t("chat_loading")):
+            st.session_state.self_analysis = llm_analysis(_self_analysis_prompt(user, stats))
+    self_text = (st.session_state.get("self_analysis") or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    st.markdown(
+        '<div class="sm-detail-grid">'
+        f'<div class="sm-radar">{radar_svg(stats)}</div>'
+        '<div class="sm-detail-right">'
+        f'<div class="sm-analysis"><div class="sm-analysis-title">{t("sec_self")} <span class="sm-ai-tag">DeepSeek</span></div><p>{self_text}</p></div>'
+        '</div></div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
+    if st.button(t("start_matching"), type="primary", use_container_width=True, key="do_match"):
+        st.session_state.view = "results"
+        st.session_state.just_matched = True
+        st.rerun()
+
 elif st.session_state.view == "results":
     # --- teammate view ---
     if "user" not in st.session_state:
@@ -2251,9 +2289,10 @@ else:
             profile = make_anonymized_profile(st.session_state.user, major)
             st.session_state.self_name = profile["name"]
             st.session_state.added_as = (profile["name"], profile["email"])
+            st.session_state.user["stats"] = profile["stats"]
             save_respondent(profile)
             candidate_pool.clear()
-            st.session_state.just_matched = True
+            st.session_state.pop("self_analysis", None)
             st.session_state.pop("picked", None)
-            st.session_state.view = "results"
+            st.session_state.view = "profile"
             st.rerun()
